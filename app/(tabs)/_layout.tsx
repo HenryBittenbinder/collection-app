@@ -1,66 +1,101 @@
-import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import theme from '@/src/shared/theme/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
+          borderTopWidth: 1,
+          height: 74,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        headerTintColor: theme.colors.text,
+        headerTitleStyle: {
+          color: theme.colors.text,
+          fontWeight: '700',
+        },
+        headerShadowVisible: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
+          title: 'Explorar',
+          headerTitle: 'Explorar',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="compass"
+              color={String(focused ? theme.colors.primary : color ?? theme.colors.textMuted)}
+              size={size}
             />
-          ),
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable style={{ marginRight: 15 }}>
-                {({ pressed }) => (
-                  <SymbolView
-                    name={{ ios: 'info.circle', android: 'info', web: 'info' }}
-                    size={25}
-                    tintColor={Colors[colorScheme].text}
-                    style={{ opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="search"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
+          title: 'Pesquisa',
+          headerTitle: 'Pesquisa',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="search"
+              color={String(focused ? theme.colors.primary : color ?? theme.colors.textMuted)}
+              size={size}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="add"
+        options={{
+          title: 'Adicionar',
+          headerTitle: 'Adicionar',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="add-circle"
+              color={String(focused ? theme.colors.primary : color ?? theme.colors.textMuted)}
+              size={size + 4}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="activity"
+        options={{
+          title: 'Atividade',
+          headerTitle: 'Atividade',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="notifications"
+              color={String(focused ? theme.colors.primary : color ?? theme.colors.textMuted)}
+              size={size}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Perfil',
+          headerTitle: 'Perfil',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name="person"
+              color={String(focused ? theme.colors.primary : color ?? theme.colors.textMuted)}
+              size={size}
             />
           ),
         }}

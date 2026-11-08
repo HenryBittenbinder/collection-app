@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { queryClient } from '@/shared/lib/queryClient';
+import { queryClient } from '@/src/shared/lib/queryClient';
 
 export {
   // Catch any errors thrown by the Layout component.
