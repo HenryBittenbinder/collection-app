@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "produtos-app",
-    "slug": "produtos-app",
+    "name": "Collection",
+"slug": "collection-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "produtosapp",
+    "scheme": "collection",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
