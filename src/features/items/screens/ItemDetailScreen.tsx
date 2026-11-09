@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useItem } from '@/src/features/items/api/itemsHooks';
+import { useDeleteItem, useItem } from '@/src/features/items/api/itemsHooks';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
@@ -13,10 +14,31 @@ const availabilityColors = { exibicao: '#FBBF24', venda: '#7C9CFF', troca: '#4AD
 const conditionLabels = { novo: 'Novo', excelente: 'Excelente', bom: 'Bom', regular: 'Regular' };
 
 export default function ItemDetailScreen() {
-  const params = useLocalSearchParams<{ id: string | string[] }>();
+  const params = useLocalSearchParams<{ id: string | string[]; from?: string | string[] }>();
   const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
   const id = Number(rawId);
   const { data: item, isLoading, isError, error, refetch } = useItem(id);
+  const deleteMutation = useDeleteItem();
+  const router = useRouter();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const source = Array.isArray(params.from) ? params.from[0] : params.from;
+  const isOwnerView = source === 'profile';
+
+  const deleteItem = async () => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      router.replace('/(tabs)/profile');
+    } catch (deleteFailure) {
+      setDeleteError(getApiError(deleteFailure).message);
+    }
+  };
+
+  const askToDelete = () => {
+    Alert.alert('Excluir item?', 'Essa ação não pode ser desfeita.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Excluir', style: 'destructive', onPress: () => { void deleteItem(); } },
+    ]);
+  };
 
   if (isLoading) return <LoadingState message="Carregando item..." />;
   if (isError || !item) {
@@ -69,6 +91,28 @@ export default function ItemDetailScreen() {
           <Text style={styles.description}>{item.description}</Text>
         </>
       )}
+
+      {isOwnerView && (
+        <View style={styles.ownerActions}>
+          {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
+          <View style={styles.actionRow}>
+            <Pressable
+              accessibilityRole="button"
+              style={styles.editButton}
+              onPress={() => router.push({ pathname: '/(tabs)/add', params: { id: String(item.id), from: 'profile' } })}
+            >
+              <MaterialCommunityIcons name="pencil-outline" size={19} color="#081018" />
+              <Text style={styles.editButtonText}>Editar</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" style={styles.deleteButton} onPress={askToDelete} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? <ActivityIndicator color="#FFFFFF" /> : <>
+                <MaterialCommunityIcons name="trash-can-outline" size={19} color="#FFFFFF" />
+                <Text style={styles.deleteButtonText}>Excluir</Text>
+              </>}
+            </Pressable>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -100,4 +144,11 @@ const styles = StyleSheet.create({
   price: { color: theme.colors.primarySoft, fontSize: 28, fontWeight: '700' },
   sectionTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '700', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.sm },
   description: { color: theme.colors.textSecondary, fontSize: 15, lineHeight: 24, paddingHorizontal: theme.spacing.lg },
+  ownerActions: { paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.xl },
+  actionRow: { flexDirection: 'row', gap: theme.spacing.md },
+  editButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: theme.colors.primary, padding: theme.spacing.md, borderRadius: theme.radius.md },
+  editButtonText: { color: '#081018', fontWeight: '700' },
+  deleteButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: '#9F2D3C', padding: theme.spacing.md, borderRadius: theme.radius.md },
+  deleteButtonText: { color: '#FFFFFF', fontWeight: '700' },
+  deleteError: { color: theme.colors.danger, fontSize: 14, marginBottom: theme.spacing.md },
 });

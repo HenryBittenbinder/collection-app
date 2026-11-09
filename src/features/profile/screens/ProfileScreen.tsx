@@ -43,7 +43,7 @@ export default function ProfileScreen() {
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <ItemCard item={item} />}
+        renderItem={({ item }) => <ItemCard item={item} isOwner />}
         ListEmptyComponent={isLoading
           ? <LoadingState message="Carregando coleção..." />
           : isError

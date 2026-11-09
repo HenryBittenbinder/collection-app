@@ -14,8 +14,8 @@ export function buildItemFormData(values: ItemFormValues, includeEmptyOptionals 
     ['availability', values.availability],
     ['brand', values.brand],
     ['description', values.description],
-    ['estimated_value', values.estimated_value?.replace(',', '.')],
-    ['asking_price', values.asking_price?.replace(',', '.')],
+    ['estimated_value', toApiMoney(values.estimated_value)],
+    ['asking_price', toApiMoney(values.asking_price)],
   ];
 
   for (const [key, value] of fields) {
@@ -35,6 +35,16 @@ export function buildItemFormData(values: ItemFormValues, includeEmptyOptionals 
   }
 
   return formData;
+}
+
+function toApiMoney(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+
+  const match = /^(\d+)(?:[.,](\d{1,2}))?$/.exec(trimmed);
+  if (!match) return undefined;
+
+  return `${match[1]}.${(match[2] ?? '').padEnd(2, '0')}`;
 }
 
 export async function getItems(): Promise<Item[]> {

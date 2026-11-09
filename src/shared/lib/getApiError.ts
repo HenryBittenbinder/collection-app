@@ -9,7 +9,7 @@ export function getApiError(error: unknown): ApiErrorInfo {
       | undefined;
     const fieldErrors = Object.fromEntries(
       Object.entries(data?.errors ?? {}).flatMap(([field, messages]) =>
-        messages[0] ? [[field, messages[0]]] : [],
+        messages[0] ? [[field, translateFieldError(field, messages[0])]] : [],
       ),
     );
 
@@ -29,4 +29,16 @@ export function getApiError(error: unknown): ApiErrorInfo {
   }
 
   return { message: 'Ocorreu um erro inesperado. Tente novamente.', fieldErrors: {} };
+}
+
+function translateFieldError(field: string, message: string) {
+  if (field === 'photo' && /failed to upload/i.test(message)) {
+    return 'Não foi possível enviar a foto. Verifique se ela tem até 4 MB e tente novamente.';
+  }
+
+  if (field === 'photo' && /must be an image/i.test(message)) {
+    return 'O arquivo selecionado precisa ser uma imagem.';
+  }
+
+  return message;
 }

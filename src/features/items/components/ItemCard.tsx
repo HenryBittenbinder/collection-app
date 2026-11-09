@@ -19,11 +19,12 @@ const availabilityColors = {
 
 type ItemCardProps = {
   item: Item;
+  isOwner?: boolean;
 };
 
-export default function ItemCard({ item }: ItemCardProps) {
+export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
   return (
-    <Link href={{ pathname: '/item/[id]', params: { id: String(item.id) } }} asChild>
+    <Link href={{ pathname: '/item/[id]', params: { id: String(item.id), ...(isOwner ? { from: 'profile' } : {}) } }} asChild>
       <Pressable style={styles.card}>
         {item.photo ? (
           <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />

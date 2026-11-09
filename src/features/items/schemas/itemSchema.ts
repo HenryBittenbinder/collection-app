@@ -4,11 +4,8 @@ const optionalText = z.string().optional();
 const optionalMoney = z
   .string()
   .optional()
-  .refine((value) => value === undefined || value.trim() === '' || /^\d+(?:[.,]\d{1,2})?$/.test(value.trim()), {
-    message: 'Informe um valor igual ou maior que zero, com até duas casas decimais.',
-  })
-  .refine((value) => value === undefined || value.trim() === '' || Number(value.replace(',', '.')) >= 0, {
-    message: 'O valor não pode ser negativo.',
+  .refine((value) => value === undefined || value === '' || /^\d+(?:\.\d{2})?$/.test(value), {
+    message: 'O valor deve ser maior ou igual a zero, com no máximo duas casas decimais.',
   });
 
 export const itemSchema = z.object({
