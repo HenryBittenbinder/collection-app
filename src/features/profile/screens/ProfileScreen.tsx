@@ -1,12 +1,17 @@
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 import ItemCard from '@/src/features/items/components/ItemCard';
-import { mockItems } from '@/src/features/items/data/mockItems';
+import { useItems } from '@/src/features/items/api/itemsHooks';
+import EmptyState from '@/src/shared/components/EmptyState';
+import ErrorState from '@/src/shared/components/ErrorState';
+import LoadingState from '@/src/shared/components/LoadingState';
+import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 
 const profileImage = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80';
 
 export default function ProfileScreen() {
+  const { data: items = [], isLoading, isError, error, refetch } = useItems();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -17,28 +22,33 @@ export default function ProfileScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{mockItems.length}</Text>
+          <Text style={styles.statNumber}>{items.length}</Text>
           <Text style={styles.statLabel}>itens</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{mockItems.filter((item) => item.availability === 'venda').length}</Text>
+          <Text style={styles.statNumber}>{items.filter((item) => item.availability === 'venda').length}</Text>
           <Text style={styles.statLabel}>à venda</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{mockItems.filter((item) => item.availability === 'troca').length}</Text>
+          <Text style={styles.statNumber}>{items.filter((item) => item.availability === 'troca').length}</Text>
           <Text style={styles.statLabel}>trocas</Text>
         </View>
       </View>
 
       <Text style={styles.collectionTitle}>Minha coleção</Text>
       <FlatList
-        data={mockItems}
+        data={items}
         keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => <ItemCard item={item} />}
+        ListEmptyComponent={isLoading
+          ? <LoadingState message="Carregando coleção..." />
+          : isError
+            ? <ErrorState message={getApiError(error).message} onRetry={() => { void refetch(); }} />
+            : <EmptyState />}
       />
     </View>
   );

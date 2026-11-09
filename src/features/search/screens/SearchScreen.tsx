@@ -10,10 +10,13 @@ import {
 } from 'react-native';
 
 import ItemCard from '@/src/features/items/components/ItemCard';
-import { mockItems } from '@/src/features/items/data/mockItems';
+import { useItems } from '@/src/features/items/api/itemsHooks';
+import EmptyState from '@/src/shared/components/EmptyState';
+import ErrorState from '@/src/shared/components/ErrorState';
+import LoadingState from '@/src/shared/components/LoadingState';
+import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 
-const categoryOptions = ['Todos', ...Array.from(new Set(mockItems.map((item) => item.category)))];
 const availabilityOptions = ['Todos', 'exibicao', 'venda', 'troca'];
 const priceOptions = ['Qualquer', 'Até R$ 200', 'Até R$ 500', 'Acima de R$ 500'];
 
@@ -22,9 +25,14 @@ export default function SearchScreen() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedAvailability, setSelectedAvailability] = useState('Todos');
   const [selectedPrice, setSelectedPrice] = useState('Qualquer');
+  const { data: items = [], isLoading, isError, error, refetch } = useItems();
+  const categoryOptions = useMemo(
+    () => ['Todos', ...Array.from(new Set(items.map((item) => item.category)))],
+    [items],
+  );
 
   const filteredItems = useMemo(() => {
-    return mockItems.filter((item) => {
+    return items.filter((item) => {
       const matchesName = item.name.toLowerCase().includes(search.toLowerCase());
       const matchesCategory =
         selectedCategory === 'Todos' || item.category === selectedCategory;
@@ -46,7 +54,10 @@ export default function SearchScreen() {
 
       return matchesName && matchesCategory && matchesAvailability && matchesPrice;
     });
-  }, [search, selectedCategory, selectedAvailability, selectedPrice]);
+  }, [items, search, selectedCategory, selectedAvailability, selectedPrice]);
+
+  if (isLoading) return <LoadingState message="Carregando itens..." />;
+  if (isError) return <ErrorState message={getApiError(error).message} onRetry={() => { void refetch(); }} />;
 
   return (
     <View style={styles.container}>
@@ -121,6 +132,7 @@ export default function SearchScreen() {
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={<EmptyState message={items.length === 0 ? 'Nenhum item cadastrado ainda' : 'Nenhum item encontrado com esses filtros.'} />}
         renderItem={({ item }) => <ItemCard item={item} />}
       />
     </View>

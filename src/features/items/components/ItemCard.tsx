@@ -1,4 +1,5 @@
 import { Link } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import theme from '@/src/shared/theme/theme';
@@ -24,7 +25,13 @@ export default function ItemCard({ item }: ItemCardProps) {
   return (
     <Link href={{ pathname: '/item/[id]', params: { id: String(item.id) } }} asChild>
       <Pressable style={styles.card}>
-        {item.photo ? <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" /> : <View style={styles.image} />}
+        {item.photo ? (
+          <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
+        ) : (
+          <View style={[styles.image, styles.photoPlaceholder]}>
+            <MaterialCommunityIcons name="image-off-outline" size={36} color={theme.colors.textMuted} />
+          </View>
+        )}
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.category}>{item.category}</Text>
@@ -37,7 +44,7 @@ export default function ItemCard({ item }: ItemCardProps) {
 
           <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
           <Text style={styles.marca}>{item.brand ?? ''}</Text>
-          <Text style={styles.price}>{item.asking_price ? `R$ ${item.asking_price}` : ''}</Text>
+          {item.asking_price !== null && <Text style={styles.price}>{formatCurrency(item.asking_price)}</Text>}
         </View>
       </Pressable>
     </Link>
@@ -58,6 +65,11 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 1,
     resizeMode: 'cover',
+  },
+  photoPlaceholder: {
+    backgroundColor: theme.colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     padding: theme.spacing.md,
@@ -103,3 +115,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+function formatCurrency(value: string) {
+  const amount = Number(value.replace(',', '.'));
+  return Number.isFinite(amount)
+    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount)
+    : value;
+}
