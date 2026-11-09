@@ -13,19 +13,19 @@ import {
   View,
 } from 'react-native';
 
-import { itemSchema, type ItemFormData } from '@/src/features/items/schemas/itemSchema';
+import { itemSchema, type ItemFormValues } from '@/src/features/items/schemas/itemSchema';
 import theme from '@/src/shared/theme/theme';
 
-const defaultValues: ItemFormData = {
-  nome: '',
-  categoria: '',
-  marca: '',
-  descricao: '',
-  estadoConservacao: '',
-  valorEstimado: 0,
-  precoDesejado: 0,
-  disponibilidade: 'exibicao',
-  fotoUrl: '',
+const defaultValues: ItemFormValues = {
+  name: '',
+  category: '',
+  brand: '',
+  description: '',
+  condition: 'novo',
+  estimated_value: '',
+  asking_price: '',
+  availability: 'exibicao',
+  photo: undefined,
 };
 
 export default function ItemFormScreen() {
@@ -35,18 +35,18 @@ export default function ItemFormScreen() {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<ItemFormData>({
+  } = useForm<ItemFormValues>({
     resolver: zodResolver(itemSchema) as any,
     defaultValues,
   });
 
-  const selectedImage = watch('fotoUrl');
+  const selectedImage = watch('photo')?.uri;
 
   const pickFromCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permissão', 'É necessário permitir o uso da câmera para continuar.');
+      Alert.alert('PermissÃ£o', 'Ã‰ necessÃ¡rio permitir o uso da cÃ¢mera para continuar.');
       return;
     }
 
@@ -56,7 +56,7 @@ export default function ItemFormScreen() {
     });
 
     if (!result.canceled && result.assets[0]?.uri) {
-      setValue('fotoUrl', result.assets[0].uri, { shouldValidate: true });
+      setValue('photo', { uri: result.assets[0].uri, fileName: result.assets[0].fileName ?? undefined, mimeType: result.assets[0].mimeType ?? undefined }, { shouldValidate: true });
     }
   };
 
@@ -64,7 +64,7 @@ export default function ItemFormScreen() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permissão', 'É necessário permitir o acesso à galeria.');
+      Alert.alert('PermissÃ£o', 'Ã‰ necessÃ¡rio permitir o acesso Ã  galeria.');
       return;
     }
 
@@ -75,12 +75,12 @@ export default function ItemFormScreen() {
     });
 
     if (!result.canceled && result.assets[0]?.uri) {
-      setValue('fotoUrl', result.assets[0].uri, { shouldValidate: true });
+      setValue('photo', { uri: result.assets[0].uri, fileName: result.assets[0].fileName ?? undefined, mimeType: result.assets[0].mimeType ?? undefined }, { shouldValidate: true });
     }
   };
 
-  const onSubmit = (data: ItemFormData) => {
-    Alert.alert('Sucesso', `Item pronto para validação: ${data.nome}`);
+  const onSubmit = (data: ItemFormValues) => {
+    Alert.alert('Sucesso', `Item pronto para validaÃ§Ã£o: ${data.name}`);
   };
 
   return (
@@ -100,10 +100,10 @@ export default function ItemFormScreen() {
         <Image source={{ uri: selectedImage }} style={styles.preview} resizeMode="cover" />
       ) : null}
 
-      <Field label="Nome" error={errors.nome?.message}>
+      <Field label="Nome" error={errors.name?.message}>
         <Controller
           control={control}
-          name="nome"
+          name="name"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               value={value}
@@ -117,10 +117,10 @@ export default function ItemFormScreen() {
         />
       </Field>
 
-      <Field label="Categoria" error={errors.categoria?.message}>
+      <Field label="Categoria" error={errors.category?.message}>
         <Controller
           control={control}
-          name="categoria"
+          name="category"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               value={value}
@@ -134,10 +134,10 @@ export default function ItemFormScreen() {
         />
       </Field>
 
-      <Field label="Marca" error={errors.marca?.message}>
+      <Field label="Marca" error={errors.brand?.message}>
         <Controller
           control={control}
-          name="marca"
+          name="brand"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               value={value}
@@ -151,10 +151,10 @@ export default function ItemFormScreen() {
         />
       </Field>
 
-      <Field label="Descrição" error={errors.descricao?.message}>
+      <Field label="DescriÃ§Ã£o" error={errors.description?.message}>
         <Controller
           control={control}
-          name="descricao"
+          name="description"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               value={value}
@@ -169,10 +169,10 @@ export default function ItemFormScreen() {
         />
       </Field>
 
-      <Field label="Estado de conservação" error={errors.estadoConservacao?.message}>
+      <Field label="Estado de conservaÃ§Ã£o" error={errors.condition?.message}>
         <Controller
           control={control}
-          name="estadoConservacao"
+          name="condition"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               value={value}
@@ -187,10 +187,10 @@ export default function ItemFormScreen() {
       </Field>
 
       <View style={styles.twoColumns}>
-        <Field label="Valor estimado" error={errors.valorEstimado?.message} width="48%">
+        <Field label="Valor estimado" error={errors.estimated_value?.message} width="48%">
           <Controller
             control={control}
-            name="valorEstimado"
+            name="estimated_value"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 value={String(value ?? '')}
@@ -205,10 +205,10 @@ export default function ItemFormScreen() {
           />
         </Field>
 
-        <Field label="Preço desejado" error={errors.precoDesejado?.message} width="48%">
+        <Field label="PreÃ§o desejado" error={errors.asking_price?.message} width="48%">
           <Controller
             control={control}
-            name="precoDesejado"
+            name="asking_price"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 value={String(value ?? '')}
@@ -224,10 +224,10 @@ export default function ItemFormScreen() {
         </Field>
       </View>
 
-      <Field label="Disponibilidade" error={errors.disponibilidade?.message}>
+      <Field label="Disponibilidade" error={errors.availability?.message}>
         <Controller
           control={control}
-          name="disponibilidade"
+          name="availability"
           render={({ field: { onChange, value } }) => (
             <View style={styles.optionRow}>
               {['exibicao', 'venda', 'troca'].map((option) => {
@@ -239,7 +239,7 @@ export default function ItemFormScreen() {
                     onPress={() => onChange(option)}
                   >
                     <Text style={[styles.optionButtonText, active && styles.optionButtonTextActive]}>
-                      {option === 'exibicao' ? 'Exibição' : option === 'venda' ? 'Venda' : 'Troca'}
+                      {option === 'exibicao' ? 'ExibiÃ§Ã£o' : option === 'venda' ? 'Venda' : 'Troca'}
                     </Text>
                   </Pressable>
                 );

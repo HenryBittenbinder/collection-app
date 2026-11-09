@@ -22,22 +22,22 @@ type ItemCardProps = {
 
 export default function ItemCard({ item }: ItemCardProps) {
   return (
-    <Link href={{ pathname: '/item/[id]', params: { id: item.id } }} asChild>
+    <Link href={{ pathname: '/item/[id]', params: { id: String(item.id) } }} asChild>
       <Pressable style={styles.card}>
-        <Image source={{ uri: item.fotoUrl }} style={styles.image} resizeMode="cover" />
+        {item.photo ? <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" /> : <View style={styles.image} />}
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.category}>{item.categoria}</Text>
+            <Text style={styles.category}>{item.category}</Text>
             <View
-              style={[styles.badge, { backgroundColor: availabilityColors[item.disponibilidade] }]}
+              style={[styles.badge, { backgroundColor: availabilityColors[item.availability] }]}
             >
-              <Text style={styles.badgeText}>{availabilityLabels[item.disponibilidade]}</Text>
+              <Text style={styles.badgeText}>{availabilityLabels[item.availability]}</Text>
             </View>
           </View>
 
-          <Text style={styles.name} numberOfLines={2}>{item.nome}</Text>
-          <Text style={styles.marca}>{item.marca}</Text>
-          <Text style={styles.price}>R$ {item.precoDesejado.toFixed(2)}</Text>
+          <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.marca}>{item.brand ?? ''}</Text>
+          <Text style={styles.price}>{item.asking_price ? `R$ ${item.asking_price}` : ''}</Text>
         </View>
       </Pressable>
     </Link>

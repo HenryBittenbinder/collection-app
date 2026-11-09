@@ -1,17 +1,36 @@
 import { z } from 'zod';
 
+const optionalText = z.string().optional();
+const optionalMoney = z
+  .string()
+  .optional()
+  .refine((value) => value === undefined || value.trim() === '' || /^\d+(?:[.,]\d{1,2})?$/.test(value.trim()), {
+    message: 'Informe um valor igual ou maior que zero, com até duas casas decimais.',
+  })
+  .refine((value) => value === undefined || value.trim() === '' || Number(value.replace(',', '.')) >= 0, {
+    message: 'O valor não pode ser negativo.',
+  });
+
 export const itemSchema = z.object({
-  nome: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres.'),
-  categoria: z.string().min(2, 'A categoria deve ser preenchida.'),
-  marca: z.string().min(2, 'A marca deve ser preenchida.'),
-  descricao: z.string().min(10, 'A descrição deve ter pelo menos 10 caracteres.'),
-  estadoConservacao: z.string().min(2, 'O estado de conservação deve ser informado.'),
-  valorEstimado: z.coerce.number().min(0, 'O valor não pode ser negativo.'),
-  precoDesejado: z.coerce.number().min(0, 'O preço não pode ser negativo.'),
-  disponibilidade: z.enum(['exibicao', 'venda', 'troca'], {
+  name: z.string().trim().min(1, 'Informe o nome do item.'),
+  category: z.string().trim().min(1, 'Informe a categoria.'),
+  brand: optionalText,
+  description: optionalText,
+  condition: z.enum(['novo', 'excelente', 'bom', 'regular'], {
+    message: 'Selecione uma condição válida.',
+  }),
+  estimated_value: optionalMoney,
+  asking_price: optionalMoney,
+  availability: z.enum(['exibicao', 'venda', 'troca'], {
     message: 'Selecione uma disponibilidade válida.',
   }),
-  fotoUrl: z.string().optional(),
+  photo: z
+    .object({
+      uri: z.string().min(1, 'Selecione uma imagem válida.'),
+      fileName: z.string().optional(),
+      mimeType: z.string().optional(),
+    })
+    .optional(),
 });
 
-export type ItemFormData = z.infer<typeof itemSchema>;
+export type ItemFormValues = z.infer<typeof itemSchema>;

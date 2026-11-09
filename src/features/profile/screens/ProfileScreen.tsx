@@ -21,11 +21,11 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>itens</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{mockItems.filter((item) => item.disponibilidade === 'venda').length}</Text>
+          <Text style={styles.statNumber}>{mockItems.filter((item) => item.availability === 'venda').length}</Text>
           <Text style={styles.statLabel}>à venda</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{mockItems.filter((item) => item.disponibilidade === 'troca').length}</Text>
+          <Text style={styles.statNumber}>{mockItems.filter((item) => item.availability === 'troca').length}</Text>
           <Text style={styles.statLabel}>trocas</Text>
         </View>
       </View>
@@ -33,7 +33,7 @@ export default function ProfileScreen() {
       <Text style={styles.collectionTitle}>Minha coleção</Text>
       <FlatList
         data={mockItems}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}

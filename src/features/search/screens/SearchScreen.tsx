@@ -13,7 +13,7 @@ import ItemCard from '@/src/features/items/components/ItemCard';
 import { mockItems } from '@/src/features/items/data/mockItems';
 import theme from '@/src/shared/theme/theme';
 
-const categoryOptions = ['Todos', ...Array.from(new Set(mockItems.map((item) => item.categoria)))];
+const categoryOptions = ['Todos', ...Array.from(new Set(mockItems.map((item) => item.category)))];
 const availabilityOptions = ['Todos', 'exibicao', 'venda', 'troca'];
 const priceOptions = ['Qualquer', 'Até R$ 200', 'Até R$ 500', 'Acima de R$ 500'];
 
@@ -25,20 +25,20 @@ export default function SearchScreen() {
 
   const filteredItems = useMemo(() => {
     return mockItems.filter((item) => {
-      const matchesName = item.nome.toLowerCase().includes(search.toLowerCase());
+      const matchesName = item.name.toLowerCase().includes(search.toLowerCase());
       const matchesCategory =
-        selectedCategory === 'Todos' || item.categoria === selectedCategory;
+        selectedCategory === 'Todos' || item.category === selectedCategory;
       const matchesAvailability =
-        selectedAvailability === 'Todos' || item.disponibilidade === selectedAvailability;
+        selectedAvailability === 'Todos' || item.availability === selectedAvailability;
 
       const matchesPrice = (() => {
         switch (selectedPrice) {
           case 'Até R$ 200':
-            return item.precoDesejado <= 200;
+            return Number(item.asking_price ?? 0) <= 200;
           case 'Até R$ 500':
-            return item.precoDesejado <= 500;
+            return Number(item.asking_price ?? 0) <= 500;
           case 'Acima de R$ 500':
-            return item.precoDesejado > 500;
+            return Number(item.asking_price ?? 0) > 500;
           default:
             return true;
         }
@@ -116,7 +116,7 @@ export default function SearchScreen() {
 
       <FlatList
         data={filteredItems}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}

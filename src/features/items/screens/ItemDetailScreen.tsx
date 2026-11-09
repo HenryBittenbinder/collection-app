@@ -18,7 +18,7 @@ const availabilityColors = {
 
 export default function ItemDetailScreen() {
   const params = useLocalSearchParams<{ id: string }>();
-  const item = mockItems.find((current) => current.id === params.id);
+  const item = mockItems.find((current) => current.id === Number(params.id));
 
   if (!item) {
     return (
@@ -30,38 +30,38 @@ export default function ItemDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Image source={{ uri: item.fotoUrl }} style={styles.image} resizeMode="cover" />
+      {item.photo ? <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" /> : null}
 
       <View style={styles.header}>
-        <Text style={styles.category}>{item.categoria}</Text>
+        <Text style={styles.category}>{item.category}</Text>
         <View
-          style={[styles.badge, { backgroundColor: availabilityColors[item.disponibilidade] }]}
+          style={[styles.badge, { backgroundColor: availabilityColors[item.availability] }]}
         >
-          <Text style={styles.badgeText}>{availabilityLabels[item.disponibilidade]}</Text>
+          <Text style={styles.badgeText}>{availabilityLabels[item.availability]}</Text>
         </View>
       </View>
 
-      <Text style={styles.name}>{item.nome}</Text>
-      <Text style={styles.marca}>{item.marca}</Text>
+      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.marca}>{item.brand ?? ''}</Text>
 
       <View style={styles.infoGrid}>
         <View style={[styles.infoBox, styles.infoBoxFirst]}>
           <Text style={styles.label}>Estado</Text>
-          <Text style={styles.value}>{item.estadoConservacao}</Text>
+          <Text style={styles.value}>{item.condition}</Text>
         </View>
         <View style={[styles.infoBox, styles.infoBoxLast]}>
           <Text style={styles.label}>Valor</Text>
-          <Text style={styles.value}>R$ {item.valorEstimado.toFixed(2)}</Text>
+          <Text style={styles.value}>{item.estimated_value ? `R$ ${item.estimated_value}` : '—'}</Text>
         </View>
       </View>
 
       <View style={styles.priceBox}>
         <Text style={styles.label}>Preço desejado</Text>
-        <Text style={styles.price}>R$ {item.precoDesejado.toFixed(2)}</Text>
+        <Text style={styles.price}>{item.asking_price ? `R$ ${item.asking_price}` : '—'}</Text>
       </View>
 
       <Text style={styles.sectionTitle}>Descrição</Text>
-      <Text style={styles.description}>{item.descricao}</Text>
+      <Text style={styles.description}>{item.description ?? ''}</Text>
     </ScrollView>
   );
 }

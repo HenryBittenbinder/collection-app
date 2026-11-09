@@ -18,15 +18,15 @@ export default function ItemListScreen() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
 
   const categories = useMemo(
-    () => ['Todos', ...Array.from(new Set(mockItems.map((item) => item.categoria)))],
+    () => ['Todos', ...Array.from(new Set(mockItems.map((item) => item.category)))],
     [],
   );
 
   const filteredItems = useMemo(() => {
     return mockItems.filter((item) => {
-      const matchesSearch = item.nome.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
       const matchesCategory =
-        selectedCategory === 'Todos' || item.categoria === selectedCategory;
+        selectedCategory === 'Todos' || item.category === selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
@@ -70,7 +70,7 @@ export default function ItemListScreen() {
 
       <FlatList
         data={filteredItems}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}

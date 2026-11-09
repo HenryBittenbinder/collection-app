@@ -1,14 +1,18 @@
+export type ItemCondition = 'novo' | 'excelente' | 'bom' | 'regular';
+
 export type ItemAvailability = 'exibicao' | 'venda' | 'troca';
 
 export interface Item {
-  id: string;
-  nome: string;
-  categoria: string;
-  marca: string;
-  descricao: string;
-  estadoConservacao: string;
-  valorEstimado: number;
-  precoDesejado: number;
-  disponibilidade: ItemAvailability;
-  fotoUrl: string;
+  id: number;
+  name: string;
+  category: string;
+  brand: string | null;
+  description: string | null;
+  condition: ItemCondition;
+  estimated_value: string | null;
+  asking_price: string | null;
+  availability: ItemAvailability;
+  photo: string | null;
+  created_at: string;
+  updated_at: string;
 }
