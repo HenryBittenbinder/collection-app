@@ -7,6 +7,8 @@ import { Controller, useForm, type FieldErrors, type FieldPath } from 'react-hoo
 import {
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -105,7 +107,7 @@ export default function ItemFormScreen() {
 
   const scrollToField = (field: string) => {
     const y = fieldPositions.current[field];
-    if (y !== undefined) scrollRef.current?.scrollTo({ y: Math.max(y - theme.spacing.lg, 0), animated: true });
+    if (y !== undefined) setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(y - theme.spacing.lg, 0), animated: true }), 250);
   };
 
   const storePhoto = (asset: ImagePicker.ImagePickerAsset) => {
@@ -203,7 +205,7 @@ export default function ItemFormScreen() {
   }
 
   return (
-    <>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView ref={(instance) => { scrollRef.current = instance; }} style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>{isEditMode ? 'Editar item' : 'Adicionar item'}</Text>
 
@@ -228,25 +230,25 @@ export default function ItemFormScreen() {
 
         <Field label="Nome" error={errors.name?.message} onLayout={(y) => { fieldPositions.current.name = y; }}>
           <Controller control={control} name="name" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput value={value} onChangeText={onChange} onBlur={onBlur} placeholder="Nome do item" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
+            <TextInput value={value} onChangeText={onChange} onBlur={onBlur} onFocus={() => scrollToField('name')} placeholder="Nome do item" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
           )} />
         </Field>
 
         <Field label="Categoria" error={errors.category?.message} onLayout={(y) => { fieldPositions.current.category = y; }}>
           <Controller control={control} name="category" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput value={value} onChangeText={onChange} onBlur={onBlur} placeholder="Ex.: Figuras" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
+            <TextInput value={value} onChangeText={onChange} onBlur={onBlur} onFocus={() => scrollToField('category')} placeholder="Ex.: Figuras" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
           )} />
         </Field>
 
         <Field label="Marca (opcional)" error={errors.brand?.message} onLayout={(y) => { fieldPositions.current.brand = y; }}>
           <Controller control={control} name="brand" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput value={value ?? ''} onChangeText={onChange} onBlur={onBlur} placeholder="Marca" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
+            <TextInput value={value ?? ''} onChangeText={onChange} onBlur={onBlur} onFocus={() => scrollToField('brand')} placeholder="Marca" placeholderTextColor={theme.colors.textMuted} style={styles.input} editable={!isPending} />
           )} />
         </Field>
 
         <Field label="Descrição (opcional)" error={errors.description?.message} onLayout={(y) => { fieldPositions.current.description = y; }}>
           <Controller control={control} name="description" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput value={value ?? ''} onChangeText={onChange} onBlur={onBlur} placeholder="Descreva o item" placeholderTextColor={theme.colors.textMuted} style={[styles.input, styles.textArea]} multiline editable={!isPending} />
+            <TextInput value={value ?? ''} onChangeText={onChange} onBlur={onBlur} onFocus={() => scrollToField('description')} placeholder="Descreva o item" placeholderTextColor={theme.colors.textMuted} style={[styles.input, styles.textArea]} multiline editable={!isPending} />
           )} />
         </Field>
 
@@ -261,12 +263,12 @@ export default function ItemFormScreen() {
         <View style={styles.twoColumns} onLayout={(event) => { fieldPositions.current.moneyRow = event.nativeEvent.layout.y; }}>
           <Field label="Valor estimado (opcional)" error={errors.estimated_value?.message} width="48%" onLayout={(y) => { fieldPositions.current.estimated_value = (fieldPositions.current.moneyRow ?? 0) + y; }}>
             <Controller control={control} name="estimated_value" render={({ field: { onChange, value } }) => (
-              <CurrencyInput value={value} onChangeValue={onChange} editable={!isPending} />
+              <CurrencyInput value={value} onChangeValue={onChange} onFocus={() => scrollToField('estimated_value')} editable={!isPending} />
             )} />
           </Field>
           <Field label="Preço pedido (opcional)" error={errors.asking_price?.message} width="48%" onLayout={(y) => { fieldPositions.current.asking_price = (fieldPositions.current.moneyRow ?? 0) + y; }}>
             <Controller control={control} name="asking_price" render={({ field: { onChange, value } }) => (
-              <CurrencyInput value={value} onChangeValue={onChange} editable={!isPending} />
+              <CurrencyInput value={value} onChangeValue={onChange} onFocus={() => scrollToField('asking_price')} editable={!isPending} />
             )} />
           </Field>
         </View>
@@ -291,7 +293,7 @@ export default function ItemFormScreen() {
         actionLabel={isEditMode ? 'Voltar ao item' : 'Ir para Explorar'}
         onAction={finishSuccess}
       />
-    </>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -47,8 +47,15 @@ function toApiMoney(value: string | undefined): string | undefined {
   return `${match[1]}.${(match[2] ?? '').padEnd(2, '0')}`;
 }
 
-export async function getItems(mine = false): Promise<Item[]> {
-  const response = await api.get<ItemsResponse>('/items', { params: mine ? { mine: 1 } : undefined });
+export type ItemFilters = { mine?: boolean; liked?: boolean; saved?: boolean };
+
+export async function getItems(filters: ItemFilters = {}): Promise<Item[]> {
+  const params = {
+    ...(filters.mine ? { mine: 1 } : {}),
+    ...(filters.liked ? { liked: 1 } : {}),
+    ...(filters.saved ? { saved: 1 } : {}),
+  };
+  const response = await api.get<ItemsResponse>('/items', { params });
   return response.data.data;
 }
 

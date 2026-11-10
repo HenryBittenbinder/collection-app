@@ -1,9 +1,11 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import CommentsSection from '@/src/features/comments/components/CommentsSection';
+import CommentComposer from '@/src/features/comments/components/CommentComposer';
+import { useToggleLike, useToggleSave } from '@/src/features/items/api/interactionHooks';
 import { useDeleteItem, useItem } from '@/src/features/items/api/itemsHooks';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
@@ -20,6 +22,8 @@ export default function ItemDetailScreen() {
   const id = Number(rawId);
   const { data: item, isLoading, isError, error, refetch } = useItem(id);
   const deleteMutation = useDeleteItem();
+  const likeMutation = useToggleLike();
+  const saveMutation = useToggleSave();
   const router = useRouter();
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -44,7 +48,7 @@ export default function ItemDetailScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {item.photo ? (
         <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
       ) : (
@@ -61,6 +65,16 @@ export default function ItemDetailScreen() {
       </View>
 
       <Text style={styles.name}>{item.name}</Text>
+      <View style={styles.interactionRow}>
+        <Pressable accessibilityRole="button" accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} style={styles.interactionButton}>
+          <Ionicons name={item.liked_by_me ? 'heart' : 'heart-outline'} size={24} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} />
+          <Text style={[styles.interactionCount, item.liked_by_me && styles.likedCount]}>{item.likes_count} curtidas</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} style={styles.interactionButton}>
+          <Ionicons name={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} size={23} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} />
+          <Text style={[styles.interactionCount, item.saved_by_me && styles.savedLabel]}>{item.saved_by_me ? 'Salvo' : 'Salvar'}</Text>
+        </Pressable>
+      </View>
       <View style={styles.ownerRow}>
         {item.owner.avatar ? <Image source={{ uri: item.owner.avatar }} style={styles.ownerAvatar} /> : <View style={[styles.ownerAvatar, styles.ownerFallback]}><Text style={styles.ownerInitial}>{item.owner.name.charAt(0).toUpperCase()}</Text></View>}
         <View><Text style={styles.ownerName}>{item.owner.name}</Text><Text style={styles.ownerUsername}>@{item.owner.username}</Text></View>
@@ -118,6 +132,7 @@ export default function ItemDetailScreen() {
       )}
       <CommentsSection itemId={item.id} />
     </ScrollView>
+    <CommentComposer itemId={item.id} />
     </KeyboardAvoidingView>
   );
 }
@@ -131,6 +146,7 @@ function formatCurrency(value: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
+  scroll: { flex: 1, backgroundColor: theme.colors.background },
   content: { paddingBottom: theme.spacing.xxl },
   image: { width: '100%', aspectRatio: 1, borderRadius: theme.radius.lg, marginTop: theme.spacing.lg },
   photoPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface },
@@ -139,6 +155,11 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: theme.spacing.md, paddingVertical: 6, borderRadius: theme.radius.pill },
   badgeText: { color: '#081018', fontSize: 10, fontWeight: '700', textTransform: 'capitalize' },
   name: { color: theme.colors.text, fontSize: 28, fontWeight: '700', paddingHorizontal: theme.spacing.lg },
+  interactionRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.sm },
+  interactionButton: { flexDirection: 'row', alignItems: 'center', marginRight: theme.spacing.xl, minHeight: 44 },
+  interactionCount: { color: theme.colors.textSecondary, fontSize: 13, marginLeft: theme.spacing.sm },
+  likedCount: { color: '#F87171' },
+  savedLabel: { color: theme.colors.primary },
   brand: { color: theme.colors.textSecondary, fontSize: 14, paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
   ownerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.md, marginBottom: theme.spacing.lg },
   ownerAvatar: { width: 42, height: 42, borderRadius: 21, marginRight: theme.spacing.md },

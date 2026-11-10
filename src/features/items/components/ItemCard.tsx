@@ -1,7 +1,8 @@
 import { Link } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useToggleLike, useToggleSave } from '@/src/features/items/api/interactionHooks';
 import theme from '@/src/shared/theme/theme';
 import type { Item } from '@/src/features/items/types/item';
 
@@ -23,9 +24,13 @@ type ItemCardProps = {
 };
 
 export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
+  const likeMutation = useToggleLike();
+  const saveMutation = useToggleSave();
+
   return (
-    <Link href={{ pathname: '/item/[id]', params: { id: String(item.id), ...(isOwner ? { from: 'profile' } : {}) } }} asChild>
-      <Pressable style={styles.card}>
+    <View style={styles.card}>
+      <Link href={{ pathname: '/item/[id]', params: { id: String(item.id), ...(isOwner ? { from: 'profile' } : {}) } }} asChild>
+        <Pressable style={styles.linkContent}>
         {item.photo ? (
           <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
         ) : (
@@ -44,7 +49,7 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
           </View>
 
           <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
-          <Text style={styles.marca}>{item.brand ?? ''}</Text>
+          <Text style={styles.marca} numberOfLines={1}>{item.brand ?? ''}</Text>
           <View style={styles.metaRow}>
             <View style={styles.ownerRow}>
               {item.owner.avatar ? <Image source={{ uri: item.owner.avatar }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback]}><Text style={styles.avatarInitial}>{item.owner.name.charAt(0).toUpperCase()}</Text></View>}
@@ -54,8 +59,18 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
           </View>
           {item.asking_price !== null && <Text style={styles.price}>{formatCurrency(item.asking_price)}</Text>}
         </View>
-      </Pressable>
-    </Link>
+        </Pressable>
+      </Link>
+      <View style={styles.interactionRow}>
+        <Pressable accessibilityRole="button" accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} style={styles.interactionButton}>
+          <Ionicons name={item.liked_by_me ? 'heart' : 'heart-outline'} size={19} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} />
+          <Text style={[styles.interactionCount, item.liked_by_me && styles.likedCount]}>{item.likes_count}</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} style={styles.interactionButton}>
+          <Ionicons name={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} size={18} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} />
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -69,6 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
+  linkContent: { flex: 1 },
   image: {
     width: '100%',
     aspectRatio: 1,
@@ -130,6 +146,10 @@ const styles = StyleSheet.create({
   ownerName: { color: theme.colors.textSecondary, fontSize: 11, flexShrink: 1 },
   commentsRow: { flexDirection: 'row', alignItems: 'center', marginLeft: theme.spacing.xs },
   commentsCount: { color: theme.colors.textSecondary, fontSize: 11, marginLeft: 3 },
+  interactionRow: { flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderTopColor: theme.colors.border, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.xs },
+  interactionButton: { minWidth: 42, height: 32, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginRight: theme.spacing.sm },
+  interactionCount: { color: theme.colors.textSecondary, fontSize: 12, marginLeft: theme.spacing.xs },
+  likedCount: { color: '#F87171' },
 });
 
 function formatCurrency(value: string) {

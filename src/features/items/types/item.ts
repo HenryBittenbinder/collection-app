@@ -25,4 +25,7 @@ export interface Item {
   owner: ItemOwner;
   is_mine: boolean;
   comments_count: number;
+  likes_count: number;
+  liked_by_me: boolean;
+  saved_by_me: boolean;
 }

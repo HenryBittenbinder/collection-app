@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createItem, deleteItem, getItem, getItems, updateItem } from './itemsApi';
+import { createItem, deleteItem, getItem, getItems, updateItem, type ItemFilters } from './itemsApi';
 import type { ItemFormValues } from '@/src/features/items/schemas/itemSchema';
 
 export const itemQueryKeys = {
   all: ['items'] as const,
-  list: (mine: boolean) => ['items', 'list', { mine }] as const,
+  list: (filters: ItemFilters) => ['items', 'list', filters] as const,
   detail: (id: number) => ['items', id] as const,
 };
 
-export function useItems(mine = false) {
-  return useQuery({ queryKey: itemQueryKeys.list(mine), queryFn: () => getItems(mine) });
+export function useItems(filters: ItemFilters = {}, enabled = true) {
+  return useQuery({ queryKey: itemQueryKeys.list(filters), queryFn: () => getItems(filters), enabled });
 }
 
 export function useItem(id: number) {

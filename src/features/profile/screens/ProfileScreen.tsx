@@ -1,4 +1,5 @@
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
 
 import ItemCard from '@/src/features/items/components/ItemCard';
 import { useItems } from '@/src/features/items/api/itemsHooks';
@@ -11,7 +12,19 @@ import theme from '@/src/shared/theme/theme';
 const profileImage = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80';
 
 export default function ProfileScreen() {
-  const { data: items = [], isLoading, isError, error, refetch } = useItems(true);
+  const [activeTab, setActiveTab] = useState<'mine' | 'saved' | 'liked'>('mine');
+  const mineQuery = useItems({ mine: true }, activeTab === 'mine');
+  const savedQuery = useItems({ saved: true }, activeTab === 'saved');
+  const likedQuery = useItems({ liked: true }, activeTab === 'liked');
+  const activeQuery = activeTab === 'mine' ? mineQuery : activeTab === 'saved' ? savedQuery : likedQuery;
+  const mineItems = mineQuery.data ?? [];
+  const activeItems = activeQuery.data ?? [];
+  const emptyMessage = activeTab === 'saved'
+    ? 'Você ainda não salvou nenhum item.'
+    : activeTab === 'liked'
+      ? 'Você ainda não curtiu nenhum item.'
+      : 'Sua coleção ainda está vazia.';
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -22,35 +35,48 @@ export default function ProfileScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{items.length}</Text>
+          <Text style={styles.statNumber}>{mineItems.length}</Text>
           <Text style={styles.statLabel}>itens</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{items.filter((item) => item.availability === 'venda').length}</Text>
+          <Text style={styles.statNumber}>{mineItems.filter((item) => item.availability === 'venda').length}</Text>
           <Text style={styles.statLabel}>à venda</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{items.filter((item) => item.availability === 'troca').length}</Text>
+          <Text style={styles.statNumber}>{mineItems.filter((item) => item.availability === 'troca').length}</Text>
           <Text style={styles.statLabel}>trocas</Text>
         </View>
       </View>
 
-      <Text style={styles.collectionTitle}>Minha coleção</Text>
+      <View style={styles.tabs}>
+        <ProfileTab label="Meus itens" selected={activeTab === 'mine'} onPress={() => setActiveTab('mine')} />
+        <ProfileTab label="Salvos" selected={activeTab === 'saved'} onPress={() => setActiveTab('saved')} />
+        <ProfileTab label="Curtidos" selected={activeTab === 'liked'} onPress={() => setActiveTab('liked')} />
+      </View>
+      <Text style={styles.collectionTitle}>{activeTab === 'mine' ? 'Minha coleção' : activeTab === 'saved' ? 'Itens salvos' : 'Itens curtidos'}</Text>
       <FlatList
-        data={items}
+        data={activeItems}
         keyExtractor={(item) => String(item.id)}
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <ItemCard item={item} isOwner />}
-        ListEmptyComponent={isLoading
-          ? <LoadingState message="Carregando coleção..." />
-          : isError
-            ? <ErrorState message={getApiError(error).message} onRetry={() => { void refetch(); }} />
-            : <EmptyState />}
+        renderItem={({ item }) => <ItemCard item={item} isOwner={activeTab === 'mine'} />}
+        ListEmptyComponent={activeQuery.isLoading
+          ? <LoadingState message="Carregando itens..." />
+          : activeQuery.isError
+            ? <ErrorState message={getApiError(activeQuery.error).message} onRetry={() => { void activeQuery.refetch(); }} />
+            : <EmptyState message={emptyMessage} />}
       />
     </View>
+  );
+}
+
+function ProfileTab({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={[styles.tab, selected && styles.tabSelected]}>
+      <Text style={[styles.tabText, selected && styles.tabTextSelected]} numberOfLines={1}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -116,6 +142,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: theme.spacing.md,
   },
+  tabs: { flexDirection: 'row', backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.xs, marginBottom: theme.spacing.lg },
+  tab: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.xs, borderRadius: theme.radius.sm },
+  tabSelected: { backgroundColor: theme.colors.primary },
+  tabText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  tabTextSelected: { color: '#081018' },
   columnWrapper: {
     justifyContent: 'space-between',
   },
