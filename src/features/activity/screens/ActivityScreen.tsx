@@ -1,5 +1,6 @@
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { mockActivity } from '@/src/features/activity/data/mockActivity';
 import ConversationList from '@/src/features/chat/components/ConversationList';
@@ -8,10 +9,11 @@ import theme from '@/src/shared/theme/theme';
 
 export default function ActivityScreen() {
   const [section, setSection] = useState<'activity' | 'chat'>('activity');
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
-      <View style={styles.sectionButtons}>
+      <View style={[styles.sectionButtons, { paddingTop: insets.top + theme.spacing.sm }]}>
         <Pressable accessibilityRole="button" accessibilityState={{ selected: section === 'activity' }} onPress={() => setSection('activity')} style={[styles.sectionButton, section === 'activity' && styles.sectionButtonActive]}>
           <Text style={styles.sectionButtonText}>Atividade</Text>
         </Pressable>
@@ -51,7 +53,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  sectionButtons: { flexDirection: 'row', gap: theme.spacing.md, paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md },
+  sectionButtons: { flexDirection: 'row', gap: theme.spacing.md, paddingHorizontal: theme.spacing.md, paddingBottom: theme.spacing.md },
   sectionButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceElevated, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md },
   sectionButtonActive: { borderWidth: 2 },
   sectionButtonText: { color: theme.colors.text, fontSize: 15, fontWeight: '600' },

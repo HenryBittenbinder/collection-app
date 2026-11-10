@@ -36,7 +36,6 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + theme.spacing.sm }]}>
         <View style={styles.profileActions}>
-          <View style={styles.actionSpacer} />
           <View style={styles.actionGroup}>
             <ProfileActionButton label="Editar perfil" icon="create-outline" onPress={() => router.push('/editar-perfil')} />
             <ProfileActionButton label="Sair da conta" icon="log-out-outline" color={theme.colors.danger} onPress={() => setLogoutVisible(true)} />
@@ -141,14 +140,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
-  actionSpacer: { flex: 1 },
-  actionGroup: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
+  actionGroup: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md },
   actionButton: {
     width: 44,
     height: 44,
     borderRadius: theme.radius.pill,
     backgroundColor: theme.colors.surfaceElevated,
     borderColor: '#333743',
+    borderTopColor: '#525866',
     borderBottomColor: '#08090C',
     borderWidth: 1,
     alignItems: 'center',
