@@ -1,12 +1,12 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
 import { queryClient } from '@/src/shared/lib/queryClient';
+import { AuthProvider, AuthRouteGuard } from '@/src/features/auth/components/AuthProvider';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -45,16 +45,21 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider value={DarkTheme}>
+          <AuthRouteGuard>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="login" options={{ headerShown: false }} />
+              <Stack.Screen name="cadastro" options={{ headerShown: false }} />
+              <Stack.Screen name="editar-perfil" options={{ title: 'Editar perfil' }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            </Stack>
+          </AuthRouteGuard>
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
