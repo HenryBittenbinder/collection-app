@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -6,7 +6,9 @@ import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, Sc
 import CommentsSection from '@/src/features/comments/components/CommentsSection';
 import CommentComposer from '@/src/features/comments/components/CommentComposer';
 import { useToggleLike, useToggleSave } from '@/src/features/items/api/interactionHooks';
+import { useStartConversation } from '@/src/features/chat/api/chatHooks';
 import { useDeleteItem, useItem } from '@/src/features/items/api/itemsHooks';
+import ActionButton from '@/src/shared/components/ActionButton';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
@@ -24,6 +26,7 @@ export default function ItemDetailScreen() {
   const deleteMutation = useDeleteItem();
   const likeMutation = useToggleLike();
   const saveMutation = useToggleSave();
+  const startConversationMutation = useStartConversation();
   const router = useRouter();
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -40,6 +43,15 @@ export default function ItemDetailScreen() {
   };
 
   const askToDelete = () => setConfirmDelete(true);
+
+  const openConversation = async () => {
+    try {
+      const conversation = await startConversationMutation.mutateAsync(id);
+      router.push({ pathname: '/chat/[id]', params: { id: String(conversation.id) } });
+    } catch {
+      // O erro da API é mostrado abaixo do botão.
+    }
+  };
 
   if (isLoading) return <LoadingState message="Carregando item..." />;
   if (isError || !item) {
@@ -66,19 +78,24 @@ export default function ItemDetailScreen() {
 
       <Text style={styles.name}>{item.name}</Text>
       <View style={styles.interactionRow}>
-        <Pressable accessibilityRole="button" accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} style={styles.interactionButton}>
-          <Ionicons name={item.liked_by_me ? 'heart' : 'heart-outline'} size={24} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} />
-          <Text style={[styles.interactionCount, item.liked_by_me && styles.likedCount]}>{item.likes_count} curtidas</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} style={styles.interactionButton}>
-          <Ionicons name={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} size={23} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} />
-          <Text style={[styles.interactionCount, item.saved_by_me && styles.savedLabel]}>{item.saved_by_me ? 'Salvo' : 'Salvar'}</Text>
-        </Pressable>
+        <ActionButton icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
+        <ActionButton icon={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} label={item.saved_by_me ? 'Salvo' : 'Salvar'} accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} />
       </View>
       <View style={styles.ownerRow}>
         {item.owner.avatar ? <Image source={{ uri: item.owner.avatar }} style={styles.ownerAvatar} /> : <View style={[styles.ownerAvatar, styles.ownerFallback]}><Text style={styles.ownerInitial}>{item.owner.name.charAt(0).toUpperCase()}</Text></View>}
         <View><Text style={styles.ownerName}>{item.owner.name}</Text><Text style={styles.ownerUsername}>@{item.owner.username}</Text></View>
       </View>
+      {!item.is_mine ? (
+        <View style={styles.contactOwner}>
+          {startConversationMutation.isError ? <Text style={styles.contactError}>{getApiError(startConversationMutation.error).message}</Text> : null}
+          <Pressable accessibilityRole="button" disabled={startConversationMutation.isPending} onPress={() => { void openConversation(); }} style={styles.contactButton}>
+            {startConversationMutation.isPending ? <ActivityIndicator color="#081018" /> : <>
+              <MaterialCommunityIcons name="message-text-outline" size={19} color="#081018" />
+              <Text style={styles.contactButtonText}>Conversar com o dono</Text>
+            </>}
+          </Pressable>
+        </View>
+      ) : null}
       {item.brand !== null && <Text style={styles.brand}>{item.brand}</Text>}
 
       <View style={styles.infoGrid}>
@@ -155,11 +172,7 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: theme.spacing.md, paddingVertical: 6, borderRadius: theme.radius.pill },
   badgeText: { color: '#081018', fontSize: 10, fontWeight: '700', textTransform: 'capitalize' },
   name: { color: theme.colors.text, fontSize: 28, fontWeight: '700', paddingHorizontal: theme.spacing.lg },
-  interactionRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.sm },
-  interactionButton: { flexDirection: 'row', alignItems: 'center', marginRight: theme.spacing.xl, minHeight: 44 },
-  interactionCount: { color: theme.colors.textSecondary, fontSize: 13, marginLeft: theme.spacing.sm },
-  likedCount: { color: '#F87171' },
-  savedLabel: { color: theme.colors.primary },
+  interactionRow: { flexDirection: 'row', alignItems: 'stretch', gap: theme.spacing.md, paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.sm },
   brand: { color: theme.colors.textSecondary, fontSize: 14, paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
   ownerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.md, marginBottom: theme.spacing.lg },
   ownerAvatar: { width: 42, height: 42, borderRadius: 21, marginRight: theme.spacing.md },
@@ -167,6 +180,10 @@ const styles = StyleSheet.create({
   ownerInitial: { color: theme.colors.text, fontWeight: '700', fontSize: 16 },
   ownerName: { color: theme.colors.text, fontWeight: '700' },
   ownerUsername: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 2 },
+  contactOwner: { paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
+  contactButton: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md },
+  contactButtonText: { color: '#081018', fontWeight: '700' },
+  contactError: { color: theme.colors.danger, fontSize: 13, marginBottom: theme.spacing.sm },
   infoGrid: { flexDirection: 'row', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
   infoBox: { flex: 1, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: theme.spacing.md },
   infoBoxFirst: { marginRight: theme.spacing.md },

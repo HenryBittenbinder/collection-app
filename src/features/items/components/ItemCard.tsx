@@ -1,8 +1,9 @@
 import { Link } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useToggleLike, useToggleSave } from '@/src/features/items/api/interactionHooks';
+import ActionButton from '@/src/shared/components/ActionButton';
 import theme from '@/src/shared/theme/theme';
 import type { Item } from '@/src/features/items/types/item';
 
@@ -62,13 +63,8 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
         </Pressable>
       </Link>
       <View style={styles.interactionRow}>
-        <Pressable accessibilityRole="button" accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} style={styles.interactionButton}>
-          <Ionicons name={item.liked_by_me ? 'heart' : 'heart-outline'} size={19} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} />
-          <Text style={[styles.interactionCount, item.liked_by_me && styles.likedCount]}>{item.likes_count}</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} style={styles.interactionButton}>
-          <Ionicons name={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} size={18} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} />
-        </Pressable>
+        <ActionButton compact icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
+        <ActionButton compact icon={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} label={item.saved_by_me ? 'Salvo' : 'Salvar'} accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} />
       </View>
     </View>
   );
@@ -146,10 +142,7 @@ const styles = StyleSheet.create({
   ownerName: { color: theme.colors.textSecondary, fontSize: 11, flexShrink: 1 },
   commentsRow: { flexDirection: 'row', alignItems: 'center', marginLeft: theme.spacing.xs },
   commentsCount: { color: theme.colors.textSecondary, fontSize: 11, marginLeft: 3 },
-  interactionRow: { flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderTopColor: theme.colors.border, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.xs },
-  interactionButton: { minWidth: 42, height: 32, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginRight: theme.spacing.sm },
-  interactionCount: { color: theme.colors.textSecondary, fontSize: 12, marginLeft: theme.spacing.xs },
-  likedCount: { color: '#F87171' },
+  interactionRow: { flexDirection: 'row', alignItems: 'stretch', gap: theme.spacing.sm, borderTopWidth: 1, borderTopColor: theme.colors.border, paddingHorizontal: theme.spacing.sm, paddingVertical: theme.spacing.xs },
 });
 
 function formatCurrency(value: string) {

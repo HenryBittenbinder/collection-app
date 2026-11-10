@@ -1,28 +1,47 @@
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
 
 import { mockActivity } from '@/src/features/activity/data/mockActivity';
+import ConversationList from '@/src/features/chat/components/ConversationList';
+import EmptyState from '@/src/shared/components/EmptyState';
 import theme from '@/src/shared/theme/theme';
 
 export default function ActivityScreen() {
+  const [section, setSection] = useState<'activity' | 'chat'>('activity');
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={mockActivity}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View style={styles.activityItem}>
-            <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>
-                <Text style={styles.user}>{item.user}</Text> {item.text}
-              </Text>
-              <Text style={styles.time}>{item.time}</Text>
+      <View style={styles.sectionButtons}>
+        <Pressable accessibilityRole="button" accessibilityState={{ selected: section === 'activity' }} onPress={() => setSection('activity')} style={[styles.sectionButton, section === 'activity' && styles.sectionButtonActive]}>
+          <Text style={styles.sectionButtonText}>Atividade</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityState={{ selected: section === 'chat' }} onPress={() => setSection('chat')} style={[styles.sectionButton, section === 'chat' && styles.sectionButtonActive]}>
+          <Text style={styles.sectionButtonText}>Chat</Text>
+        </Pressable>
+      </View>
+      {section === 'activity' ? (
+        <FlatList
+          data={mockActivity}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.activityItem}>
+              <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
+              <View style={styles.textContainer}>
+                <Text style={styles.text}>
+                  <Text style={styles.user}>{item.user}</Text> {item.text}
+                </Text>
+                <Text style={styles.time}>{item.time}</Text>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      ) : (
+        <View style={styles.chatContent}>
+          <ConversationList />
+        </View>
+      )}
     </View>
   );
 }
@@ -32,6 +51,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  sectionButtons: { flexDirection: 'row', gap: theme.spacing.md, paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md },
+  sectionButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', borderWidth: 1, borderColor: '#FFFFFF', borderRadius: theme.radius.md },
+  sectionButtonActive: { borderWidth: 2 },
+  sectionButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  chatContent: { flex: 1 },
   listContent: {
     padding: theme.spacing.md,
   },
