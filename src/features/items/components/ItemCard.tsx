@@ -14,9 +14,9 @@ const availabilityLabels = {
 };
 
 const availabilityColors = {
-  exibicao: '#FBBF24',
-  venda: '#7C9CFF',
-  troca: '#4ADE80',
+  exibicao: theme.colors.primary,
+  venda: theme.colors.primaryDark,
+  troca: theme.colors.success,
 };
 
 type ItemCardProps = {
@@ -29,7 +29,7 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
   const saveMutation = useToggleSave();
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderColor: availabilityColors[item.availability] }]}>
       <Link href={{ pathname: '/item/[id]', params: { id: String(item.id), ...(isOwner ? { from: 'profile' } : {}) } }} asChild>
         <Pressable style={styles.linkContent}>
         {item.photo ? (
@@ -63,7 +63,7 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
         </Pressable>
       </Link>
       <View style={styles.interactionRow}>
-        <ActionButton compact icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
+        <ActionButton compact icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? theme.colors.danger : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
         <ActionButton compact icon={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} label={item.saved_by_me ? 'Salvo' : 'Salvar'} accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} />
       </View>
     </View>
@@ -73,12 +73,13 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceElevated,
     borderRadius: theme.radius.lg,
     overflow: 'hidden',
     margin: theme.spacing.xs,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    ...theme.shadows.button,
   },
   linkContent: { flex: 1 },
   image: {
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
   },
   badgeText: {
-    color: '#081018',
+    color: '#211707',
     fontSize: 10,
     fontWeight: '700',
     textTransform: 'capitalize',
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   price: {
-    color: theme.colors.primarySoft,
+    color: theme.colors.primary,
     fontSize: 14,
     fontWeight: '700',
   },

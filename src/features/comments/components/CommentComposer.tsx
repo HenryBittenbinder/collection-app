@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useCreateComment } from '@/src/features/comments/api/commentsHooks';
 import { commentSchema, type CommentFormValues } from '@/src/features/comments/schemas/commentSchema';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
+import Button from '@/src/shared/components/Button';
 
 export default function CommentComposer({ itemId }: { itemId: number }) {
   const createMutation = useCreateComment(itemId);
@@ -29,9 +30,7 @@ export default function CommentComposer({ itemId }: { itemId: number }) {
           {createMutation.isError ? <Text style={styles.error}>{getApiError(createMutation.error).fieldErrors.body ?? getApiError(createMutation.error).message}</Text> : null}
         </View>
       )} />
-      <Pressable accessibilityRole="button" style={styles.button} onPress={() => { void handleSubmit(submit)(); }} disabled={createMutation.isPending}>
-        {createMutation.isPending ? <ActivityIndicator color="#081018" /> : <Text style={styles.buttonText}>Enviar</Text>}
-      </Pressable>
+      <Button title="Enviar" loading={createMutation.isPending} onPress={() => { void handleSubmit(submit)(); }} style={styles.button} />
     </View>
   );
 }
@@ -42,6 +41,5 @@ const styles = StyleSheet.create({
   input: { maxHeight: 112, minHeight: 46, color: theme.colors.text, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, textAlignVertical: 'center' },
   inputError: { borderColor: theme.colors.danger },
   error: { color: theme.colors.danger, fontSize: 11, marginTop: theme.spacing.xs },
-  button: { minWidth: 76, height: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary, paddingHorizontal: theme.spacing.md, borderRadius: theme.radius.md },
-  buttonText: { color: '#081018', fontWeight: '700' },
+  button: { minWidth: 76, alignSelf: 'auto' },
 });

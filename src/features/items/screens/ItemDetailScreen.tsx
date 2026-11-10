@@ -9,13 +9,14 @@ import { useToggleLike, useToggleSave } from '@/src/features/items/api/interacti
 import { useStartConversation } from '@/src/features/chat/api/chatHooks';
 import { useDeleteItem, useItem } from '@/src/features/items/api/itemsHooks';
 import ActionButton from '@/src/shared/components/ActionButton';
+import Button from '@/src/shared/components/Button';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 
 const availabilityLabels = { exibicao: 'Exibição', venda: 'Venda', troca: 'Troca' };
-const availabilityColors = { exibicao: '#FBBF24', venda: '#7C9CFF', troca: '#4ADE80' };
+const availabilityColors = { exibicao: theme.colors.primary, venda: theme.colors.primaryDark, troca: theme.colors.success };
 const conditionLabels = { novo: 'Novo', excelente: 'Excelente', bom: 'Bom', regular: 'Regular' };
 
 export default function ItemDetailScreen() {
@@ -78,7 +79,7 @@ export default function ItemDetailScreen() {
 
       <Text style={styles.name}>{item.name}</Text>
       <View style={styles.interactionRow}>
-        <ActionButton icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? '#F87171' : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
+        <ActionButton icon={item.liked_by_me ? 'heart' : 'heart-outline'} label={`${item.likes_count} ${item.likes_count === 1 ? 'curtida' : 'curtidas'}`} accessibilityLabel={item.liked_by_me ? 'Descurtir item' : 'Curtir item'} color={item.liked_by_me ? theme.colors.danger : theme.colors.textSecondary} disabled={likeMutation.isPending} onPress={() => likeMutation.mutate(item.id)} />
         <ActionButton icon={item.saved_by_me ? 'bookmark' : 'bookmark-outline'} label={item.saved_by_me ? 'Salvo' : 'Salvar'} accessibilityLabel={item.saved_by_me ? 'Remover item dos salvos' : 'Salvar item'} color={item.saved_by_me ? theme.colors.primary : theme.colors.textSecondary} disabled={saveMutation.isPending} onPress={() => saveMutation.mutate(item.id)} />
       </View>
       <View style={styles.ownerRow}>
@@ -88,12 +89,7 @@ export default function ItemDetailScreen() {
       {!item.is_mine ? (
         <View style={styles.contactOwner}>
           {startConversationMutation.isError ? <Text style={styles.contactError}>{getApiError(startConversationMutation.error).message}</Text> : null}
-          <Pressable accessibilityRole="button" disabled={startConversationMutation.isPending} onPress={() => { void openConversation(); }} style={styles.contactButton}>
-            {startConversationMutation.isPending ? <ActivityIndicator color="#081018" /> : <>
-              <MaterialCommunityIcons name="message-text-outline" size={19} color="#081018" />
-              <Text style={styles.contactButtonText}>Conversar com o dono</Text>
-            </>}
-          </Pressable>
+          <Button title="Conversar com o dono" icon="chatbubble-ellipses-outline" loading={startConversationMutation.isPending} onPress={() => { void openConversation(); }} style={styles.contactButton} />
         </View>
       ) : null}
       {item.brand !== null && <Text style={styles.brand}>{item.brand}</Text>}
@@ -181,8 +177,7 @@ const styles = StyleSheet.create({
   ownerName: { color: theme.colors.text, fontWeight: '700' },
   ownerUsername: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 2 },
   contactOwner: { paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
-  contactButton: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingHorizontal: theme.spacing.md },
-  contactButtonText: { color: '#081018', fontWeight: '700' },
+  contactButton: { marginTop: theme.spacing.xs },
   contactError: { color: theme.colors.danger, fontSize: 13, marginBottom: theme.spacing.sm },
   infoGrid: { flexDirection: 'row', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
   infoBox: { flex: 1, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: theme.spacing.md },

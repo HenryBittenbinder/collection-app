@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
@@ -13,6 +13,7 @@ import { useUpdateProfile } from '@/src/features/auth/api/authHooks';
 import { profileSchema, type ProfileFormValues } from '@/src/features/auth/schemas/profileSchema';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
+import Button from '@/src/shared/components/Button';
 
 export default function EditProfileScreen() {
   const { user } = useAuth();
@@ -103,9 +104,7 @@ export default function EditProfileScreen() {
           <ProfileField control={control} name="bio" label="Descrição" placeholder="Conte um pouco sobre sua coleção" multiline error={errors.bio?.message} />
           <Text style={styles.counter}>Até 160 caracteres</Text>
 
-          <Pressable accessibilityRole="button" disabled={updateMutation.isPending} onPress={() => { void submit(); }} style={({ pressed }) => [styles.saveButton, pressed && styles.pressed, updateMutation.isPending && styles.disabled]}>
-            {updateMutation.isPending ? <ActivityIndicator color="#081018" /> : <Text style={styles.saveText}>Salvar alterações</Text>}
-          </Pressable>
+          <Button title="Salvar alterações" loading={updateMutation.isPending} onPress={() => { void submit(); }} style={styles.saveButton} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
   avatar: { width: 104, height: 104, borderRadius: 52 },
   avatarFallback: { backgroundColor: theme.colors.surfaceAlt, borderColor: theme.colors.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   avatarInitial: { color: theme.colors.primarySoft, fontSize: 38, fontWeight: '800' },
-  photoButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: -22, marginLeft: 76, borderColor: theme.colors.background, borderWidth: 3 },
+  photoButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: -22, marginLeft: 76, borderColor: theme.colors.background, borderWidth: 3, ...theme.shadows.button },
   avatarHint: { color: theme.colors.textSecondary, fontSize: 12, marginTop: theme.spacing.sm },
   bannerError: { color: theme.colors.danger, fontSize: 14, lineHeight: 20, marginBottom: theme.spacing.md },
   successMessage: { color: theme.colors.success, fontSize: 14, lineHeight: 20, marginBottom: theme.spacing.md },
@@ -151,8 +150,5 @@ const styles = StyleSheet.create({
   inputError: { borderColor: theme.colors.danger },
   fieldError: { color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs },
   counter: { color: theme.colors.textMuted, fontSize: 12, marginTop: -theme.spacing.xs, marginBottom: theme.spacing.md },
-  saveButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, marginTop: theme.spacing.md },
-  saveText: { color: '#081018', fontSize: 15, fontWeight: '800' },
-  disabled: { opacity: 0.7 },
-  pressed: { opacity: 0.85 },
+  saveButton: { marginTop: theme.spacing.md },
 });

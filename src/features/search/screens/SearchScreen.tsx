@@ -22,6 +22,7 @@ import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
+import Button from '@/src/shared/components/Button';
 
 type Filters = { category: string; condition: ItemCondition | ''; availability: ItemAvailability | '' };
 const emptyFilters: Filters = { category: '', condition: '', availability: '' };
@@ -103,8 +104,8 @@ export default function SearchScreen() {
               <FilterGroup title="Disponibilidade" options={availabilityOptions} value={draftFilters.availability} onSelect={(availability) => setDraftFilters((current) => ({ ...current, availability: availability as ItemAvailability }))} />
             </ScrollView>
             <View style={styles.sheetActions}>
-              <Pressable style={styles.clearButton} onPress={clearFilters}><Text style={styles.clearButtonText}>Limpar filtros</Text></Pressable>
-              <Pressable style={styles.applyButton} onPress={applyFilters}><Text style={styles.applyButtonText}>Aplicar</Text></Pressable>
+              <Button title="Limpar filtros" variant="secondary" onPress={clearFilters} style={styles.filterActionButton} textStyle={styles.filterActionText} />
+              <Button title="Aplicar filtros" onPress={applyFilters} style={styles.filterActionButton} />
             </View>
           </View>
         </View>
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, color: theme.colors.text, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.sm, fontSize: 15 },
   filterButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md },
   filterBadge: { position: 'absolute', top: -5, right: -5, minWidth: 19, height: 19, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary, borderRadius: 10 },
-  filterBadgeText: { color: '#081018', fontSize: 11, fontWeight: '700' },
+  filterBadgeText: { color: '#211707', fontSize: 11, fontWeight: '700' },
   resultText: { color: theme.colors.textSecondary, fontSize: 12, marginBottom: theme.spacing.sm },
   columnWrapper: { gap: theme.spacing.md, paddingHorizontal: theme.spacing.xs },
   cardSpacer: { flex: 1, margin: theme.spacing.xs },
@@ -162,10 +163,8 @@ const styles = StyleSheet.create({
   chip: { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.pill, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, marginRight: theme.spacing.sm, marginBottom: theme.spacing.sm },
   chipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   chipText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600' },
-  chipTextActive: { color: '#081018' },
+  chipTextActive: { color: '#211707' },
   sheetActions: { flexDirection: 'row', gap: theme.spacing.md, paddingTop: theme.spacing.md, borderTopWidth: 1, borderTopColor: theme.colors.border },
-  clearButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border },
-  clearButtonText: { color: theme.colors.text, fontWeight: '600' },
-  applyButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primary, borderRadius: theme.radius.md },
-  applyButtonText: { color: '#081018', fontWeight: '700' },
+  filterActionButton: { flex: 1 },
+  filterActionText: { fontSize: 13 },
 });

@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   filterChip: { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.pill, paddingHorizontal: theme.spacing.md, height: 36, minWidth: 80, justifyContent: 'center', alignItems: 'center', marginRight: theme.spacing.sm },
   filterChipActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   filterChipText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600', textAlign: 'center', includeFontPadding: false },
-  filterChipTextActive: { color: '#081018' },
+  filterChipTextActive: { color: '#211707' },
   columnWrapper: { justifyContent: 'space-between' },
   listContent: { paddingBottom: theme.spacing.xxl },
   emptyContent: { flexGrow: 1 },

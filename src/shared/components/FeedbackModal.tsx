@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import theme from '@/src/shared/theme/theme';
+import Button from '@/src/shared/components/Button';
 
 type FeedbackModalProps = {
   visible: boolean;
@@ -17,13 +18,11 @@ export default function FeedbackModal({ visible, title, message, actionLabel, on
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.iconCircle}>
-            <Ionicons name="checkmark" size={34} color="#081018" />
+            <Ionicons name="checkmark" size={34} color="#211707" />
           </View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
-          <Pressable accessibilityRole="button" onPress={onAction} style={styles.button}>
-            <Text style={styles.buttonText}>{actionLabel}</Text>
-          </Pressable>
+          <Button title={actionLabel} onPress={onAction} style={styles.button} />
         </View>
       </View>
     </Modal>
@@ -36,6 +35,5 @@ const styles = StyleSheet.create({
   iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: theme.colors.success, alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.lg },
   title: { color: theme.colors.text, fontSize: 20, fontWeight: '700', textAlign: 'center', marginBottom: theme.spacing.sm },
   message: { color: theme.colors.textSecondary, fontSize: 14, textAlign: 'center', lineHeight: 21, marginBottom: theme.spacing.lg },
-  button: { alignSelf: 'stretch', backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, padding: theme.spacing.md, alignItems: 'center' },
-  buttonText: { color: '#081018', fontWeight: '700', fontSize: 15 },
+  button: { alignSelf: 'stretch' },
 });

@@ -20,6 +20,7 @@ import {
 import { useCreateItem, useItem, useUpdateItem } from '@/src/features/items/api/itemsHooks';
 import { itemSchema, type ItemFormValues } from '@/src/features/items/schemas/itemSchema';
 import CurrencyInput from '@/src/shared/components/CurrencyInput';
+import Button from '@/src/shared/components/Button';
 import FeedbackModal from '@/src/shared/components/FeedbackModal';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
@@ -281,9 +282,7 @@ export default function ItemFormScreen() {
           )} />
         </Field>
 
-        <Pressable onPress={() => { void handleSubmit(onSubmit, onInvalid)(); }} style={[styles.submitButton, isPending && styles.submitButtonDisabled]} disabled={isPending}>
-          {isPending ? <ActivityIndicator color="#081018" /> : <Text style={styles.submitButtonText}>{isEditMode ? 'Salvar alterações' : 'Cadastrar item'}</Text>}
-        </Pressable>
+        <Button title={isEditMode ? 'Salvar alterações' : 'Cadastrar item'} loading={isPending} onPress={() => { void handleSubmit(onSubmit, onInvalid)(); }} style={styles.submitButton} />
       </ScrollView>
 
       <FeedbackModal
@@ -325,7 +324,7 @@ const styles = StyleSheet.create({
   errorBannerText: { flex: 1, color: '#FCA5A5', fontSize: 14, lineHeight: 20 },
   imageRow: { flexDirection: 'row', gap: theme.spacing.md, marginBottom: theme.spacing.md },
   primaryButton: { flex: 1, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingVertical: theme.spacing.md, alignItems: 'center' },
-  primaryButtonText: { color: '#081018', fontWeight: '700' },
+  primaryButtonText: { color: '#211707', fontWeight: '700' },
   secondaryButton: { flex: 1, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md, paddingVertical: theme.spacing.md, alignItems: 'center' },
   secondaryButtonText: { color: theme.colors.text, fontWeight: '600' },
   preview: { width: '100%', height: 200, borderRadius: theme.radius.lg, marginBottom: theme.spacing.lg, backgroundColor: theme.colors.surface },
@@ -338,9 +337,7 @@ const styles = StyleSheet.create({
   optionButton: { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.pill, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, marginRight: theme.spacing.sm, marginBottom: theme.spacing.sm },
   optionButtonActive: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   optionButtonText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600' },
-  optionButtonTextActive: { color: '#081018' },
-  submitButton: { backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.md, minHeight: 50, justifyContent: 'center' },
-  submitButtonDisabled: { opacity: 0.65 },
-  submitButtonText: { color: '#081018', fontWeight: '700', fontSize: 16 },
+  optionButtonTextActive: { color: '#211707' },
+  submitButton: { marginTop: theme.spacing.md },
   errorText: { color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs },
 });

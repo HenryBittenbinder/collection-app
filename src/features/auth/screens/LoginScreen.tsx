@@ -2,12 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
 import { loginSchema, type LoginFormValues } from '@/src/features/auth/schemas/loginSchema';
 import { getApiError } from '@/src/shared/lib/getApiError';
+import Button from '@/src/shared/components/Button';
 import theme from '@/src/shared/theme/theme';
 
 export default function LoginScreen() {
@@ -53,9 +54,7 @@ export default function LoginScreen() {
           )} />
           {errors.password ? <Text style={styles.fieldError}>{errors.password.message}</Text> : null}
 
-          <Pressable accessibilityRole="button" disabled={isSubmitting} onPress={() => { void submit(); }} style={({ pressed }) => [styles.submitButton, pressed && styles.pressed, isSubmitting && styles.disabled]}>
-            {isSubmitting ? <ActivityIndicator color="#081018" /> : <Text style={styles.submitText}>Entrar</Text>}
-          </Pressable>
+          <Button title="Entrar" loading={isSubmitting} onPress={() => { void submit(); }} style={styles.submitButton} />
           <View style={styles.footer}>
             <Text style={styles.footerText}>Ainda não tem uma conta?</Text>
             <Link href="/cadastro" style={styles.link}>Criar conta</Link>
@@ -70,8 +69,8 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
   content: { flexGrow: 1, justifyContent: 'center', padding: theme.spacing.xl },
-  mark: { width: 54, height: 54, borderRadius: 18, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.lg },
-  markText: { fontSize: 28, fontWeight: '900', color: '#081018' },
+  mark: { width: 54, height: 54, borderRadius: 18, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.lg, ...theme.shadows.button },
+  markText: { fontSize: 28, fontWeight: '900', color: '#211707' },
   eyebrow: { color: theme.colors.primarySoft, fontSize: 12, fontWeight: '800', letterSpacing: 2, marginBottom: theme.spacing.sm },
   title: { color: theme.colors.text, fontSize: 30, lineHeight: 36, fontWeight: '800', marginBottom: theme.spacing.sm },
   subtitle: { color: theme.colors.textSecondary, fontSize: 15, lineHeight: 22, marginBottom: theme.spacing.xl },
@@ -80,11 +79,8 @@ const styles = StyleSheet.create({
   inputError: { borderColor: theme.colors.danger },
   fieldError: { color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs },
   bannerError: { color: theme.colors.danger, fontSize: 14, lineHeight: 20, marginBottom: theme.spacing.sm },
-  submitButton: { minHeight: 52, backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, alignItems: 'center', justifyContent: 'center', marginTop: theme.spacing.xl },
-  submitText: { color: '#081018', fontSize: 16, fontWeight: '800' },
-  disabled: { opacity: 0.7 },
-  pressed: { opacity: 0.85 },
+  submitButton: { marginTop: theme.spacing.xl },
   footer: { flexDirection: 'row', justifyContent: 'center', gap: theme.spacing.xs, marginTop: theme.spacing.xl },
   footerText: { color: theme.colors.textSecondary, fontSize: 14 },
-  link: { color: theme.colors.primarySoft, fontSize: 14, fontWeight: '700' },
+  link: { color: theme.colors.primary, fontSize: 14, fontWeight: '700' },
 });

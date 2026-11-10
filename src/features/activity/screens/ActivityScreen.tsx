@@ -52,9 +52,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   sectionButtons: { flexDirection: 'row', gap: theme.spacing.md, paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md },
-  sectionButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', borderWidth: 1, borderColor: '#FFFFFF', borderRadius: theme.radius.md },
+  sectionButton: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceElevated, borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.radius.md },
   sectionButtonActive: { borderWidth: 2 },
-  sectionButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  sectionButtonText: { color: theme.colors.text, fontSize: 15, fontWeight: '600' },
   chatContent: { flex: 1 },
   listContent: {
     padding: theme.spacing.md,

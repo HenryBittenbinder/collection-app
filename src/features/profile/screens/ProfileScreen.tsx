@@ -11,6 +11,7 @@ import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
+import Button from '@/src/shared/components/Button';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -89,12 +90,8 @@ export default function ProfileScreen() {
             <View style={styles.logoutIcon}><Ionicons name="log-out-outline" size={26} color={theme.colors.danger} /></View>
             <Text style={styles.modalTitle}>Sair da conta?</Text>
             <Text style={styles.modalMessage}>Você precisará entrar novamente para acessar sua coleção.</Text>
-            <Pressable accessibilityRole="button" onPress={() => { setLogoutVisible(false); void signOut(); }} style={styles.logoutConfirm}>
-              <Text style={styles.logoutConfirmText}>Sair</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => setLogoutVisible(false)} style={styles.logoutCancel}>
-              <Text style={styles.logoutCancelText}>Cancelar</Text>
-            </Pressable>
+            <Button title="Sair" onPress={() => { setLogoutVisible(false); void signOut(); }} style={styles.logoutConfirm} />
+            <Button title="Cancelar" variant="ghost" onPress={() => setLogoutVisible(false)} style={styles.logoutCancel} />
           </View>
         </View>
       </Modal>
@@ -197,7 +194,7 @@ const styles = StyleSheet.create({
   tab: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.xs, borderRadius: theme.radius.sm },
   tabSelected: { backgroundColor: theme.colors.primary },
   tabText: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600' },
-  tabTextSelected: { color: '#081018' },
+  tabTextSelected: { color: '#211707' },
   columnWrapper: {
     justifyContent: 'space-between',
   },
@@ -211,8 +208,6 @@ const styles = StyleSheet.create({
   logoutIcon: { width: 54, height: 54, borderRadius: 27, backgroundColor: 'rgba(248,113,113,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.md },
   modalTitle: { color: theme.colors.text, fontSize: 20, fontWeight: '800', marginBottom: theme.spacing.sm },
   modalMessage: { color: theme.colors.textSecondary, fontSize: 14, lineHeight: 21, textAlign: 'center', marginBottom: theme.spacing.lg },
-  logoutConfirm: { alignSelf: 'stretch', minHeight: 48, backgroundColor: theme.colors.danger, borderRadius: theme.radius.md, alignItems: 'center', justifyContent: 'center' },
-  logoutConfirmText: { color: '#1B0C0C', fontWeight: '800', fontSize: 15 },
-  logoutCancel: { minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: theme.spacing.xs },
-  logoutCancelText: { color: theme.colors.textSecondary, fontSize: 14, fontWeight: '600' },
+  logoutConfirm: { alignSelf: 'stretch' },
+  logoutCancel: { marginTop: theme.spacing.xs },
 });

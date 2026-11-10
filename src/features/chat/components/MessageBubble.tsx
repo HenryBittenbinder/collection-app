@@ -28,5 +28,5 @@ const styles = StyleSheet.create({
   body: { color: theme.colors.text, fontSize: 14, lineHeight: 20 },
   myBody: { color: '#081018' },
   time: { alignSelf: 'flex-end', color: theme.colors.textMuted, fontSize: 10, marginTop: theme.spacing.xs },
-  myTime: { color: '#26365D' },
+  myTime: { color: '#5D4728' },
 });
