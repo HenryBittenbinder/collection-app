@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import CommentsSection from '@/src/features/comments/components/CommentsSection';
@@ -12,6 +13,7 @@ import ActionButton from '@/src/shared/components/ActionButton';
 import Button from '@/src/shared/components/Button';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
+import BackButton from '@/src/shared/components/BackButton';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 
@@ -29,6 +31,7 @@ export default function ItemDetailScreen() {
   const saveMutation = useToggleSave();
   const startConversationMutation = useStartConversation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const source = Array.isArray(params.from) ? params.from[0] : params.from;
@@ -61,6 +64,7 @@ export default function ItemDetailScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}><BackButton /></View>
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {item.photo ? (
         <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
@@ -160,6 +164,7 @@ function formatCurrency(value: string) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   scroll: { flex: 1, backgroundColor: theme.colors.background },
+  backHeader: { paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm },
   content: { paddingBottom: theme.spacing.xxl },
   image: { width: '100%', aspectRatio: 1, borderRadius: theme.radius.lg, marginTop: theme.spacing.lg },
   photoPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface },

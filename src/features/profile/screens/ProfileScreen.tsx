@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
@@ -12,9 +12,11 @@ import LoadingState from '@/src/shared/components/LoadingState';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 import Button from '@/src/shared/components/Button';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'mine' | 'saved' | 'liked'>('mine');
   const [logoutVisible, setLogoutVisible] = useState(false);
@@ -32,14 +34,13 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + theme.spacing.sm }]}>
         <View style={styles.profileActions}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Editar perfil" onPress={() => router.push('/editar-perfil')} style={styles.actionButton}>
-            <Ionicons name="create-outline" size={22} color={theme.colors.text} />
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Sair da conta" onPress={() => setLogoutVisible(true)} style={styles.actionButton}>
-            <Ionicons name="log-out-outline" size={22} color={theme.colors.text} />
-          </Pressable>
+          <View style={styles.actionSpacer} />
+          <View style={styles.actionGroup}>
+            <ProfileActionButton label="Editar perfil" icon="create-outline" onPress={() => router.push('/editar-perfil')} />
+            <ProfileActionButton label="Sair da conta" icon="log-out-outline" color={theme.colors.danger} onPress={() => setLogoutVisible(true)} />
+          </View>
         </View>
         {user?.avatar
           ? <Image source={{ uri: user.avatar }} style={styles.avatar} />
@@ -99,6 +100,20 @@ export default function ProfileScreen() {
   );
 }
 
+function ProfileActionButton({ label, icon, color = theme.colors.text, onPress }: { label: string; icon: keyof typeof Ionicons.glyphMap; color?: string; onPress: () => void }) {
+  const scale = useState(() => new Animated.Value(1))[0];
+  const [pressed, setPressed] = useState(false);
+  const animate = (toValue: number) => Animated.spring(scale, { toValue, useNativeDriver: true, speed: 30, bounciness: 3 }).start();
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={label} hitSlop={8} onPress={onPress} onPressIn={() => { setPressed(true); animate(0.94); }} onPressOut={() => { setPressed(false); animate(1); }} style={[styles.actionButton, pressed && styles.actionPressed]}>
+        <Ionicons name={icon} size={21} color={color} />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 function ProfileTab({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={[styles.tab, selected && styles.tabSelected]}>
@@ -116,28 +131,31 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    paddingVertical: theme.spacing.lg,
-    paddingTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.lg,
   },
   profileActions: {
     position: 'absolute',
     top: 0,
     right: 0,
-    left: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     zIndex: 1,
   },
+  actionSpacer: { flex: 1 },
+  actionGroup: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
   actionButton: {
     width: 44,
     height: 44,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceElevated,
+    borderColor: '#333743',
+    borderBottomColor: '#08090C',
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    ...theme.shadows.button,
   },
+  actionPressed: { shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.16, shadowRadius: 2, elevation: 1 },
   avatar: {
     width: 88,
     height: 88,

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
 import type { ProfilePhoto } from '@/src/features/auth/api/authApi';
@@ -13,9 +14,11 @@ import { useUpdateProfile } from '@/src/features/auth/api/authHooks';
 import { profileSchema, type ProfileFormValues } from '@/src/features/auth/schemas/profileSchema';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
+import BackButton from '@/src/shared/components/BackButton';
 import Button from '@/src/shared/components/Button';
 
 export default function EditProfileScreen() {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const updateMutation = useUpdateProfile();
   const [avatar, setAvatar] = useState<ProfilePhoto | undefined>();
@@ -86,6 +89,7 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}><BackButton /></View>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.avatarBlock}>
             {displayAvatar
@@ -134,6 +138,7 @@ function ProfileField({ control, name, label, placeholder, error, multiline, aut
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
+  backHeader: { paddingHorizontal: theme.spacing.xl, paddingBottom: theme.spacing.sm },
   content: { padding: theme.spacing.xl, paddingBottom: theme.spacing.xxxl },
   avatarBlock: { alignItems: 'center', marginBottom: theme.spacing.xl },
   avatar: { width: 104, height: 104, borderRadius: 52 },

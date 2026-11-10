@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useConversations, useMessages } from '@/src/features/chat/api/chatHooks';
 import MessageBubble from '@/src/features/chat/components/MessageBubble';
@@ -9,6 +10,7 @@ import MessageComposer from '@/src/features/chat/components/MessageComposer';
 import EmptyState from '@/src/shared/components/EmptyState';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
+import BackButton from '@/src/shared/components/BackButton';
 import { getApiError } from '@/src/shared/lib/getApiError';
 import theme from '@/src/shared/theme/theme';
 
@@ -16,7 +18,7 @@ export default function ChatConversationScreen() {
   const params = useLocalSearchParams<{ id: string | string[] }>();
   const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
   const conversationId = Number(rawId);
-  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollViewInstance | null>(null);
   const conversationsQuery = useConversations();
   const messagesQuery = useMessages(conversationId);
@@ -40,10 +42,8 @@ export default function ChatConversationScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={22} color={theme.colors.text} />
-        </Pressable>
+      <View style={[styles.header, { paddingTop: insets.top + theme.spacing.md }]}>
+        <BackButton />
         {conversation.other_user.avatar ? <Image source={{ uri: conversation.other_user.avatar }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback]}><Text style={styles.initial}>{conversation.other_user.name.charAt(0).toUpperCase()}</Text></View>}
         <View style={styles.headerText}>
           <Text style={styles.name} numberOfLines={1}>{conversation.other_user.name}</Text>
@@ -78,7 +78,6 @@ export default function ChatConversationScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  backButton: { width: 40, height: 44, alignItems: 'flex-start', justifyContent: 'center' },
   avatar: { width: 42, height: 42, borderRadius: 21, marginRight: theme.spacing.sm },
   avatarFallback: { backgroundColor: theme.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   initial: { color: theme.colors.text, fontSize: 17, fontWeight: '700' },
