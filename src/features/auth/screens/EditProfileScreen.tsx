@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -19,6 +19,8 @@ import Button from '@/src/shared/components/Button';
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollViewInstance | null>(null);
+  const scrollToFocusedField = () => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 250);
   const { user } = useAuth();
   const updateMutation = useUpdateProfile();
   const [avatar, setAvatar] = useState<ProfilePhoto | undefined>();
@@ -90,7 +92,7 @@ export default function EditProfileScreen() {
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}><BackButton /></View>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.avatarBlock}>
             {displayAvatar
               ? <Image source={{ uri: displayAvatar }} style={styles.avatar} />
@@ -103,9 +105,9 @@ export default function EditProfileScreen() {
 
           {bannerError ? <Text accessibilityRole="alert" style={styles.bannerError}>{bannerError}</Text> : null}
           {successMessage ? <Text accessibilityLiveRegion="polite" style={styles.successMessage}>{successMessage}</Text> : null}
-          <ProfileField control={control} name="name" label="Nome" placeholder="Seu nome" error={errors.name?.message} />
-          <ProfileField control={control} name="username" label="Nome de usuário" placeholder="Sem espaços" autoCapitalize="none" error={errors.username?.message} />
-          <ProfileField control={control} name="bio" label="Descrição" placeholder="Conte um pouco sobre sua coleção" multiline error={errors.bio?.message} />
+          <ProfileField control={control} name="name" label="Nome" placeholder="Seu nome" error={errors.name?.message} onFocus={scrollToFocusedField} />
+          <ProfileField control={control} name="username" label="Nome de usuário" placeholder="Sem espaços" autoCapitalize="none" error={errors.username?.message} onFocus={scrollToFocusedField} />
+          <ProfileField control={control} name="bio" label="Descrição" placeholder="Conte um pouco sobre sua coleção" multiline error={errors.bio?.message} onFocus={scrollToFocusedField} />
           <Text style={styles.counter}>Até 160 caracteres</Text>
 
           <Button title="Salvar alterações" loading={updateMutation.isPending} onPress={() => { void submit(); }} style={styles.saveButton} />
@@ -115,7 +117,7 @@ export default function EditProfileScreen() {
   );
 }
 
-function ProfileField({ control, name, label, placeholder, error, multiline, autoCapitalize }: {
+function ProfileField({ control, name, label, placeholder, error, multiline, autoCapitalize, onFocus }: {
   control: ReturnType<typeof useForm<ProfileFormValues>>['control'];
   name: keyof ProfileFormValues;
   label: string;
@@ -123,12 +125,13 @@ function ProfileField({ control, name, label, placeholder, error, multiline, aut
   error?: string;
   multiline?: boolean;
   autoCapitalize?: 'none' | 'sentences';
+  onFocus: () => void;
 }) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <Controller control={control} name={name} render={({ field: { onChange, onBlur, value } }) => (
-        <TextInput autoCapitalize={autoCapitalize ?? 'sentences'} placeholder={placeholder} placeholderTextColor={theme.colors.textMuted} value={String(value ?? '')} onChangeText={onChange} onBlur={onBlur} multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.multilineInput, error && styles.inputError]} />
+        <TextInput autoCapitalize={autoCapitalize ?? 'sentences'} placeholder={placeholder} placeholderTextColor={theme.colors.textMuted} value={String(value ?? '')} onChangeText={onChange} onBlur={onBlur} onFocus={onFocus} multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.multilineInput, error && styles.inputError]} />
       )} />
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
     </View>
@@ -139,7 +142,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
   backHeader: { paddingHorizontal: theme.spacing.xl, paddingBottom: theme.spacing.sm },
-  content: { padding: theme.spacing.xl, paddingBottom: theme.spacing.xxxl },
+  content: { padding: theme.spacing.xl, paddingBottom: 140 },
   avatarBlock: { alignItems: 'center', marginBottom: theme.spacing.xl },
   avatar: { width: 104, height: 104, borderRadius: 52 },
   avatarFallback: { backgroundColor: theme.colors.surfaceAlt, borderColor: theme.colors.border, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },

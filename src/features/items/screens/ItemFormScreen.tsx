@@ -318,7 +318,7 @@ function Field({ label, error, children, width, onLayout }: FieldProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: theme.spacing.lg, paddingBottom: theme.spacing.xxl },
+  content: { padding: theme.spacing.lg, paddingBottom: 140 },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '700', marginBottom: theme.spacing.lg },
   errorBanner: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm, backgroundColor: '#351C22', borderColor: theme.colors.danger, borderWidth: 1, borderRadius: theme.radius.md, padding: theme.spacing.md, marginBottom: theme.spacing.lg },
   errorBannerText: { flex: 1, color: '#FCA5A5', fontSize: 14, lineHeight: 20 },

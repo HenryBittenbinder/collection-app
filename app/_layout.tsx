@@ -55,6 +55,8 @@ function RootLayoutNav() {
               <Stack.Screen name="login" options={{ headerShown: false }} />
               <Stack.Screen name="cadastro" options={{ headerShown: false }} />
               <Stack.Screen name="editar-perfil" options={{ title: 'Editar perfil' }} />
+              <Stack.Screen name="item/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="noticias/index" options={{ headerShown: false }} />
               <Stack.Screen name="noticias/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal' }} />

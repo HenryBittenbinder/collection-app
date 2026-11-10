@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
@@ -15,6 +15,8 @@ import Button from '@/src/shared/components/Button';
 export default function RegisterScreen() {
   const { establishSession } = useAuth();
   const registerMutation = useRegister();
+  const scrollRef = useRef<ScrollViewInstance | null>(null);
+  const scrollToFocusedField = () => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 250);
   const [requestError, setRequestError] = useState<string | null>(null);
   const { control, handleSubmit, formState: { errors }, setError } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema) as any,
@@ -40,17 +42,17 @@ export default function RegisterScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.mark}><Text style={styles.markText}>C</Text></View>
           <Text style={styles.eyebrow}>SUA PRÓXIMA DESCOBERTA</Text>
           <Text style={styles.title}>Crie sua conta.</Text>
           <Text style={styles.subtitle}>Monte seu perfil e encontre outras pessoas que compartilham sua coleção.</Text>
           {requestError ? <Text accessibilityRole="alert" style={styles.bannerError}>{requestError}</Text> : null}
-          <AuthField control={control} name="name" label="Nome" placeholder="Como podemos chamar você?" error={errors.name?.message} />
-          <AuthField control={control} name="username" label="Nome de usuário" placeholder="sem espaços" autoCapitalize="none" error={errors.username?.message} />
-          <AuthField control={control} name="email" label="E-mail" placeholder="voce@exemplo.com" keyboardType="email-address" autoCapitalize="none" error={errors.email?.message} />
-          <AuthField control={control} name="password" label="Senha" placeholder="Pelo menos 8 caracteres" secureTextEntry error={errors.password?.message} />
-          <AuthField control={control} name="password_confirmation" label="Confirme sua senha" placeholder="Digite a senha novamente" secureTextEntry error={errors.password_confirmation?.message} />
+          <AuthField control={control} name="name" label="Nome" placeholder="Como podemos chamar você?" error={errors.name?.message} onFocus={scrollToFocusedField} />
+          <AuthField control={control} name="username" label="Nome de usuário" placeholder="sem espaços" autoCapitalize="none" error={errors.username?.message} onFocus={scrollToFocusedField} />
+          <AuthField control={control} name="email" label="E-mail" placeholder="voce@exemplo.com" keyboardType="email-address" autoCapitalize="none" error={errors.email?.message} onFocus={scrollToFocusedField} />
+          <AuthField control={control} name="password" label="Senha" placeholder="Pelo menos 8 caracteres" secureTextEntry error={errors.password?.message} onFocus={scrollToFocusedField} />
+          <AuthField control={control} name="password_confirmation" label="Confirme sua senha" placeholder="Digite a senha novamente" secureTextEntry error={errors.password_confirmation?.message} onFocus={scrollToFocusedField} />
           <Button title="Criar conta" loading={registerMutation.isPending} onPress={() => { void submit(); }} style={styles.submitButton} />
           <View style={styles.footer}>
             <Text style={styles.footerText}>Já tem uma conta?</Text>
@@ -68,6 +70,7 @@ function AuthField({ control, name, label, placeholder, error, ...inputProps }: 
   label: string;
   placeholder: string;
   error?: string;
+  onFocus: () => void;
   secureTextEntry?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   keyboardType?: 'default' | 'email-address';
@@ -76,7 +79,7 @@ function AuthField({ control, name, label, placeholder, error, ...inputProps }: 
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <Controller control={control} name={name} render={({ field: { onChange, onBlur, value } }) => (
-        <TextInput autoCapitalize={inputProps.autoCapitalize ?? 'sentences'} autoComplete="off" keyboardType={inputProps.keyboardType ?? 'default'} secureTextEntry={inputProps.secureTextEntry} placeholder={placeholder} placeholderTextColor={theme.colors.textMuted} value={String(value ?? '')} onChangeText={onChange} onBlur={onBlur} style={[styles.input, error && styles.inputError]} />
+        <TextInput autoCapitalize={inputProps.autoCapitalize ?? 'sentences'} autoComplete="off" keyboardType={inputProps.keyboardType ?? 'default'} secureTextEntry={inputProps.secureTextEntry} placeholder={placeholder} placeholderTextColor={theme.colors.textMuted} value={String(value ?? '')} onChangeText={onChange} onBlur={onBlur} onFocus={inputProps.onFocus} style={[styles.input, error && styles.inputError]} />
       )} />
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
     </View>
@@ -86,7 +89,7 @@ function AuthField({ control, name, label, placeholder, error, ...inputProps }: 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
-  content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.xl },
+  content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.xl, paddingBottom: 140 },
   mark: { width: 48, height: 48, borderRadius: 16, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.md, ...theme.shadows.button },
   markText: { fontSize: 25, fontWeight: '900', color: '#211707' },
   eyebrow: { color: theme.colors.primarySoft, fontSize: 11, fontWeight: '800', letterSpacing: 1.7, marginBottom: theme.spacing.sm },

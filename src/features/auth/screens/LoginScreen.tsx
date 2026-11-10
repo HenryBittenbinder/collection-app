@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/features/auth/components/AuthProvider';
@@ -13,6 +13,8 @@ import theme from '@/src/shared/theme/theme';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const scrollRef = useRef<ScrollViewInstance | null>(null);
+  const scrollToFocusedField = () => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 250);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
@@ -35,7 +37,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.mark}><Text style={styles.markText}>C</Text></View>
           <Text style={styles.eyebrow}>COLLECTION</Text>
           <Text style={styles.title}>Que bom ter você de volta.</Text>
@@ -44,13 +46,13 @@ export default function LoginScreen() {
           {requestError ? <Text accessibilityRole="alert" style={styles.bannerError}>{requestError}</Text> : null}
           <Text style={styles.label}>E-mail</Text>
           <Controller control={control} name="email" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput autoCapitalize="none" autoComplete="email" keyboardType="email-address" placeholder="voce@exemplo.com" placeholderTextColor={theme.colors.textMuted} value={value} onChangeText={onChange} onBlur={onBlur} style={[styles.input, errors.email && styles.inputError]} />
+            <TextInput autoCapitalize="none" autoComplete="email" keyboardType="email-address" placeholder="voce@exemplo.com" placeholderTextColor={theme.colors.textMuted} value={value} onChangeText={onChange} onBlur={onBlur} onFocus={scrollToFocusedField} style={[styles.input, errors.email && styles.inputError]} />
           )} />
           {errors.email ? <Text style={styles.fieldError}>{errors.email.message}</Text> : null}
 
           <Text style={styles.label}>Senha</Text>
           <Controller control={control} name="password" render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput autoCapitalize="none" secureTextEntry placeholder="Sua senha" placeholderTextColor={theme.colors.textMuted} value={value} onChangeText={onChange} onBlur={onBlur} style={[styles.input, errors.password && styles.inputError]} />
+            <TextInput autoCapitalize="none" secureTextEntry placeholder="Sua senha" placeholderTextColor={theme.colors.textMuted} value={value} onChangeText={onChange} onBlur={onBlur} onFocus={scrollToFocusedField} style={[styles.input, errors.password && styles.inputError]} />
           )} />
           {errors.password ? <Text style={styles.fieldError}>{errors.password.message}</Text> : null}
 
@@ -68,7 +70,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
-  content: { flexGrow: 1, justifyContent: 'center', padding: theme.spacing.xl },
+  content: { flexGrow: 1, justifyContent: 'center', padding: theme.spacing.xl, paddingBottom: 140 },
   mark: { width: 54, height: 54, borderRadius: 18, backgroundColor: theme.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: theme.spacing.lg, ...theme.shadows.button },
   markText: { fontSize: 28, fontWeight: '900', color: '#211707' },
   eyebrow: { color: theme.colors.primarySoft, fontSize: 12, fontWeight: '800', letterSpacing: 2, marginBottom: theme.spacing.sm },

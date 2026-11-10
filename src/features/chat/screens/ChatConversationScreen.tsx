@@ -89,6 +89,6 @@ const styles = StyleSheet.create({
   itemPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface },
   itemName: { color: theme.colors.textSecondary, fontSize: 12, fontWeight: '600', flex: 1 },
   messagesScroll: { flex: 1 },
-  messagesContent: { padding: theme.spacing.md, paddingBottom: theme.spacing.lg, flexGrow: 1, justifyContent: 'flex-end' },
+  messagesContent: { padding: theme.spacing.md, paddingBottom: 140, flexGrow: 1, justifyContent: 'flex-end' },
   emptyMessages: { color: theme.colors.textMuted, textAlign: 'center', marginVertical: theme.spacing.xl },
 });

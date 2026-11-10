@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -36,6 +36,32 @@ export default function ItemDetailScreen() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const source = Array.isArray(params.from) ? params.from[0] : params.from;
   const isOwnerView = source === 'profile';
+  const askToDelete = () => setConfirmDelete(true);
+
+  const detailHeader = (
+    <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}>
+      <BackButton />
+      <View style={styles.titleBlock}>
+        {item ? <Text style={styles.headerCategory} numberOfLines={1}>{item.category}</Text> : null}
+        <Text style={styles.headerTitle} numberOfLines={1}>{item?.name ?? 'Item'}</Text>
+      </View>
+      {item && isOwnerView ? (
+        <View style={styles.headerActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Editar item"
+            style={styles.headerActionButton}
+            onPress={() => router.push({ pathname: '/(tabs)/add', params: { id: String(item.id), from: 'profile' } })}
+          >
+            <MaterialCommunityIcons name="pencil-outline" size={20} color={theme.colors.primary} />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Excluir item" style={styles.headerActionButton} onPress={askToDelete} disabled={deleteMutation.isPending || confirmDelete}>
+            {deleteMutation.isPending ? <ActivityIndicator color={theme.colors.text} /> : <MaterialCommunityIcons name="trash-can-outline" size={20} color={theme.colors.danger} />}
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
+  );
 
   const deleteItem = async () => {
     try {
@@ -46,8 +72,6 @@ export default function ItemDetailScreen() {
     }
   };
 
-  const askToDelete = () => setConfirmDelete(true);
-
   const openConversation = async () => {
     try {
       const conversation = await startConversationMutation.mutateAsync(id);
@@ -57,14 +81,15 @@ export default function ItemDetailScreen() {
     }
   };
 
-  if (isLoading) return <LoadingState message="Carregando item..." />;
+  if (isLoading) return <View style={styles.container}>{detailHeader}<LoadingState message="Carregando item..." /></View>;
   if (isError || !item) {
-    return <ErrorState message={getApiError(error).message} onRetry={() => { void refetch(); }} />;
+    return <View style={styles.container}>{detailHeader}<ErrorState message={getApiError(error).message} onRetry={() => { void refetch(); }} /></View>;
   }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}><BackButton /></View>
+    <Stack.Screen options={{ headerShown: false }} />
+    {detailHeader}
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {item.photo ? (
         <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
@@ -129,22 +154,6 @@ export default function ItemDetailScreen() {
         <View style={styles.ownerActions}>
           {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
           {confirmDelete ? <View style={styles.confirmBox}><Text style={styles.confirmText}>Excluir este item? Essa ação não pode ser desfeita.</Text><View style={styles.confirmActions}><Pressable onPress={() => setConfirmDelete(false)} style={styles.cancelButton}><Text style={styles.editButtonText}>Cancelar</Text></Pressable><Pressable onPress={() => { void deleteItem(); }} style={styles.confirmDeleteButton}><Text style={styles.deleteButtonText}>Confirmar exclusão</Text></Pressable></View></View> : null}
-          <View style={styles.actionRow}>
-            <Pressable
-              accessibilityRole="button"
-              style={styles.editButton}
-              onPress={() => router.push({ pathname: '/(tabs)/add', params: { id: String(item.id), from: 'profile' } })}
-            >
-              <MaterialCommunityIcons name="pencil-outline" size={19} color="#081018" />
-              <Text style={styles.editButtonText}>Editar</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" style={styles.deleteButton} onPress={askToDelete} disabled={deleteMutation.isPending || confirmDelete}>
-              {deleteMutation.isPending ? <ActivityIndicator color="#FFFFFF" /> : <>
-                <MaterialCommunityIcons name="trash-can-outline" size={19} color="#FFFFFF" />
-                <Text style={styles.deleteButtonText}>Excluir</Text>
-              </>}
-            </Pressable>
-          </View>
         </View>
       )}
       <CommentsSection itemId={item.id} />
@@ -164,8 +173,13 @@ function formatCurrency(value: string) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   scroll: { flex: 1, backgroundColor: theme.colors.background },
-  backHeader: { paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm },
-  content: { paddingBottom: theme.spacing.xxl },
+  backHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm, gap: theme.spacing.sm },
+  content: { paddingBottom: 140 },
+  titleBlock: { flex: 1, minWidth: 0, justifyContent: 'center' },
+  headerCategory: { color: theme.colors.textSecondary, fontSize: 11, marginBottom: 2 },
+  headerTitle: { flex: 1, color: theme.colors.text, fontSize: 17, fontWeight: '700' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs },
+  headerActionButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: theme.radius.md, backgroundColor: theme.colors.surface },
   image: { width: '100%', aspectRatio: 1, borderRadius: theme.radius.lg, marginTop: theme.spacing.lg },
   photoPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.lg, marginBottom: theme.spacing.sm },
