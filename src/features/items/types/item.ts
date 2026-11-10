@@ -2,6 +2,13 @@ export type ItemCondition = 'novo' | 'excelente' | 'bom' | 'regular';
 
 export type ItemAvailability = 'exibicao' | 'venda' | 'troca';
 
+export interface ItemOwner {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string | null;
+}
+
 export interface Item {
   id: number;
   name: string;
@@ -15,4 +22,7 @@ export interface Item {
   photo: string | null;
   created_at: string;
   updated_at: string;
+  owner: ItemOwner;
+  is_mine: boolean;
+  comments_count: number;
 }

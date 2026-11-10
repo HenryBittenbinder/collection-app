@@ -5,11 +5,12 @@ import type { ItemFormValues } from '@/src/features/items/schemas/itemSchema';
 
 export const itemQueryKeys = {
   all: ['items'] as const,
+  list: (mine: boolean) => ['items', 'list', { mine }] as const,
   detail: (id: number) => ['items', id] as const,
 };
 
-export function useItems() {
-  return useQuery({ queryKey: itemQueryKeys.all, queryFn: getItems });
+export function useItems(mine = false) {
+  return useQuery({ queryKey: itemQueryKeys.list(mine), queryFn: () => getItems(mine) });
 }
 
 export function useItem(id: number) {

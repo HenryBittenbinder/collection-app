@@ -11,7 +11,7 @@ import theme from '@/src/shared/theme/theme';
 const profileImage = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80';
 
 export default function ProfileScreen() {
-  const { data: items = [], isLoading, isError, error, refetch } = useItems();
+  const { data: items = [], isLoading, isError, error, refetch } = useItems(true);
   return (
     <View style={styles.container}>
       <View style={styles.header}>

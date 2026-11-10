@@ -1,7 +1,5 @@
-import type { Item } from '@/src/features/items/types/item';
-
 // Dados de demonstração mantidos até a próxima etapa de integração das telas.
-export const mockItems: Item[] = [
+export const mockItems = [
   { id: 1, name: 'Funko Pop Goku Ultra Instinct', category: 'Figuras', brand: 'Funko', description: 'Figura colecionável com acabamento brilhante e pose dinâmica de batalha.', condition: 'excelente', estimated_value: '280.00', asking_price: '230.00', availability: 'venda', photo: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=900&q=80', created_at: '', updated_at: '' },
   { id: 2, name: 'Miniatura de Ducati', category: 'Miniaturas', brand: 'Hot Wheels', description: 'Miniatura detalhada de modelo esportivo em boa condição e acabamento premium.', condition: 'bom', estimated_value: '190.00', asking_price: '160.00', availability: 'troca', photo: 'https://images.unsplash.com/photo-1558980664-10e7170b5df9?auto=format&fit=crop&w=900&q=80', created_at: '', updated_at: '' },
   { id: 3, name: 'Baralho Pokémon 1999', category: 'Cards', brand: 'Pokémon', description: 'Baralho raro com cartas em excelente preservação e embalagem vintage.', condition: 'excelente', estimated_value: '420.00', asking_price: '360.00', availability: 'exibicao', photo: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=900&q=80', created_at: '', updated_at: '' },

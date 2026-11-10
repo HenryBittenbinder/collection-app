@@ -45,6 +45,13 @@ export default function ItemCard({ item, isOwner = false }: ItemCardProps) {
 
           <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
           <Text style={styles.marca}>{item.brand ?? ''}</Text>
+          <View style={styles.metaRow}>
+            <View style={styles.ownerRow}>
+              {item.owner.avatar ? <Image source={{ uri: item.owner.avatar }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback]}><Text style={styles.avatarInitial}>{item.owner.name.charAt(0).toUpperCase()}</Text></View>}
+              <Text style={styles.ownerName} numberOfLines={1}>@{item.owner.username}</Text>
+            </View>
+            <View style={styles.commentsRow}><MaterialCommunityIcons name="comment-outline" size={14} color={theme.colors.textSecondary} /><Text style={styles.commentsCount}>{item.comments_count}</Text></View>
+          </View>
           {item.asking_price !== null && <Text style={styles.price}>{formatCurrency(item.asking_price)}</Text>}
         </View>
       </Pressable>
@@ -115,6 +122,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  metaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: theme.spacing.sm },
+  ownerRow: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
+  avatar: { width: 24, height: 24, borderRadius: 12, marginRight: theme.spacing.xs },
+  avatarFallback: { backgroundColor: theme.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  avatarInitial: { color: theme.colors.text, fontSize: 12, fontWeight: '700' },
+  ownerName: { color: theme.colors.textSecondary, fontSize: 11, flexShrink: 1 },
+  commentsRow: { flexDirection: 'row', alignItems: 'center', marginLeft: theme.spacing.xs },
+  commentsCount: { color: theme.colors.textSecondary, fontSize: 11, marginLeft: 3 },
 });
 
 function formatCurrency(value: string) {

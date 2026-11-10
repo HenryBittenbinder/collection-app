@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import CommentsSection from '@/src/features/comments/components/CommentsSection';
 import { useDeleteItem, useItem } from '@/src/features/items/api/itemsHooks';
 import ErrorState from '@/src/shared/components/ErrorState';
 import LoadingState from '@/src/shared/components/LoadingState';
@@ -21,6 +22,7 @@ export default function ItemDetailScreen() {
   const deleteMutation = useDeleteItem();
   const router = useRouter();
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const source = Array.isArray(params.from) ? params.from[0] : params.from;
   const isOwnerView = source === 'profile';
 
@@ -33,12 +35,7 @@ export default function ItemDetailScreen() {
     }
   };
 
-  const askToDelete = () => {
-    Alert.alert('Excluir item?', 'Essa ação não pode ser desfeita.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Excluir', style: 'destructive', onPress: () => { void deleteItem(); } },
-    ]);
-  };
+  const askToDelete = () => setConfirmDelete(true);
 
   if (isLoading) return <LoadingState message="Carregando item..." />;
   if (isError || !item) {
@@ -46,7 +43,8 @@ export default function ItemDetailScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       {item.photo ? (
         <Image source={{ uri: item.photo }} style={styles.image} resizeMode="cover" />
       ) : (
@@ -63,6 +61,10 @@ export default function ItemDetailScreen() {
       </View>
 
       <Text style={styles.name}>{item.name}</Text>
+      <View style={styles.ownerRow}>
+        {item.owner.avatar ? <Image source={{ uri: item.owner.avatar }} style={styles.ownerAvatar} /> : <View style={[styles.ownerAvatar, styles.ownerFallback]}><Text style={styles.ownerInitial}>{item.owner.name.charAt(0).toUpperCase()}</Text></View>}
+        <View><Text style={styles.ownerName}>{item.owner.name}</Text><Text style={styles.ownerUsername}>@{item.owner.username}</Text></View>
+      </View>
       {item.brand !== null && <Text style={styles.brand}>{item.brand}</Text>}
 
       <View style={styles.infoGrid}>
@@ -95,6 +97,7 @@ export default function ItemDetailScreen() {
       {isOwnerView && (
         <View style={styles.ownerActions}>
           {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
+          {confirmDelete ? <View style={styles.confirmBox}><Text style={styles.confirmText}>Excluir este item? Essa ação não pode ser desfeita.</Text><View style={styles.confirmActions}><Pressable onPress={() => setConfirmDelete(false)} style={styles.cancelButton}><Text style={styles.editButtonText}>Cancelar</Text></Pressable><Pressable onPress={() => { void deleteItem(); }} style={styles.confirmDeleteButton}><Text style={styles.deleteButtonText}>Confirmar exclusão</Text></Pressable></View></View> : null}
           <View style={styles.actionRow}>
             <Pressable
               accessibilityRole="button"
@@ -104,7 +107,7 @@ export default function ItemDetailScreen() {
               <MaterialCommunityIcons name="pencil-outline" size={19} color="#081018" />
               <Text style={styles.editButtonText}>Editar</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" style={styles.deleteButton} onPress={askToDelete} disabled={deleteMutation.isPending}>
+            <Pressable accessibilityRole="button" style={styles.deleteButton} onPress={askToDelete} disabled={deleteMutation.isPending || confirmDelete}>
               {deleteMutation.isPending ? <ActivityIndicator color="#FFFFFF" /> : <>
                 <MaterialCommunityIcons name="trash-can-outline" size={19} color="#FFFFFF" />
                 <Text style={styles.deleteButtonText}>Excluir</Text>
@@ -113,7 +116,9 @@ export default function ItemDetailScreen() {
           </View>
         </View>
       )}
+      <CommentsSection itemId={item.id} />
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -135,6 +140,12 @@ const styles = StyleSheet.create({
   badgeText: { color: '#081018', fontSize: 10, fontWeight: '700', textTransform: 'capitalize' },
   name: { color: theme.colors.text, fontSize: 28, fontWeight: '700', paddingHorizontal: theme.spacing.lg },
   brand: { color: theme.colors.textSecondary, fontSize: 14, paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
+  ownerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.md, marginBottom: theme.spacing.lg },
+  ownerAvatar: { width: 42, height: 42, borderRadius: 21, marginRight: theme.spacing.md },
+  ownerFallback: { backgroundColor: theme.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  ownerInitial: { color: theme.colors.text, fontWeight: '700', fontSize: 16 },
+  ownerName: { color: theme.colors.text, fontWeight: '700' },
+  ownerUsername: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 2 },
   infoGrid: { flexDirection: 'row', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg },
   infoBox: { flex: 1, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md, padding: theme.spacing.md },
   infoBoxFirst: { marginRight: theme.spacing.md },
@@ -151,4 +162,9 @@ const styles = StyleSheet.create({
   deleteButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: '#9F2D3C', padding: theme.spacing.md, borderRadius: theme.radius.md },
   deleteButtonText: { color: '#FFFFFF', fontWeight: '700' },
   deleteError: { color: theme.colors.danger, fontSize: 14, marginBottom: theme.spacing.md },
+  confirmBox: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.md, marginBottom: theme.spacing.md },
+  confirmText: { color: theme.colors.text, marginBottom: theme.spacing.md },
+  confirmActions: { flexDirection: 'row', gap: theme.spacing.sm },
+  cancelButton: { flex: 1, alignItems: 'center', backgroundColor: theme.colors.surfaceAlt, padding: theme.spacing.md, borderRadius: theme.radius.md },
+  confirmDeleteButton: { flex: 1, alignItems: 'center', backgroundColor: '#9F2D3C', padding: theme.spacing.md, borderRadius: theme.radius.md },
 });
