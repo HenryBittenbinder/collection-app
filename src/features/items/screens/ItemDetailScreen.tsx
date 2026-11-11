@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import CommentsSection from '@/src/features/comments/components/CommentsSection';
 import CommentComposer from '@/src/features/comments/components/CommentComposer';
@@ -35,8 +35,10 @@ export default function ItemDetailScreen() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const source = Array.isArray(params.from) ? params.from[0] : params.from;
-  const isOwnerView = source === 'profile';
-  const askToDelete = () => setConfirmDelete(true);
+  const askToDelete = () => {
+    setDeleteError(null);
+    setConfirmDelete(true);
+  };
 
   const detailHeader = (
     <View style={[styles.backHeader, { paddingTop: insets.top + theme.spacing.sm }]}>
@@ -45,18 +47,19 @@ export default function ItemDetailScreen() {
         {item ? <Text style={styles.headerCategory} numberOfLines={1}>{item.category}</Text> : null}
         <Text style={styles.headerTitle} numberOfLines={1}>{item?.name ?? 'Item'}</Text>
       </View>
-      {item && isOwnerView ? (
+      {item?.is_mine ? (
         <View style={styles.headerActions}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Editar item"
             style={styles.headerActionButton}
+            hitSlop={12}
             onPress={() => router.push({ pathname: '/(tabs)/add', params: { id: String(item.id), from: 'profile' } })}
           >
-            <MaterialCommunityIcons name="pencil-outline" size={20} color={theme.colors.primary} />
+            <MaterialCommunityIcons name="pencil-outline" size={24} color={theme.colors.primary} />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Excluir item" style={styles.headerActionButton} onPress={askToDelete} disabled={deleteMutation.isPending || confirmDelete}>
-            {deleteMutation.isPending ? <ActivityIndicator color={theme.colors.text} /> : <MaterialCommunityIcons name="trash-can-outline" size={20} color={theme.colors.danger} />}
+          <Pressable accessibilityRole="button" accessibilityLabel="Excluir item" style={styles.headerActionButton} hitSlop={12} onPress={askToDelete} disabled={deleteMutation.isPending || confirmDelete}>
+            {deleteMutation.isPending ? <ActivityIndicator color={theme.colors.text} /> : <MaterialCommunityIcons name="trash-can-outline" size={24} color={theme.colors.danger} />}
           </Pressable>
         </View>
       ) : null}
@@ -66,7 +69,9 @@ export default function ItemDetailScreen() {
   const deleteItem = async () => {
     try {
       await deleteMutation.mutateAsync(id);
-      router.replace('/(tabs)/profile');
+      setConfirmDelete(false);
+      if (source === 'profile') router.back();
+      else router.replace('/(tabs)/profile');
     } catch (deleteFailure) {
       setDeleteError(getApiError(deleteFailure).message);
     }
@@ -150,15 +155,26 @@ export default function ItemDetailScreen() {
         </>
       )}
 
-      {isOwnerView && (
-        <View style={styles.ownerActions}>
-          {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
-          {confirmDelete ? <View style={styles.confirmBox}><Text style={styles.confirmText}>Excluir este item? Essa ação não pode ser desfeita.</Text><View style={styles.confirmActions}><Pressable onPress={() => setConfirmDelete(false)} style={styles.cancelButton}><Text style={styles.editButtonText}>Cancelar</Text></Pressable><Pressable onPress={() => { void deleteItem(); }} style={styles.confirmDeleteButton}><Text style={styles.deleteButtonText}>Confirmar exclusão</Text></Pressable></View></View> : null}
-        </View>
-      )}
       <CommentsSection itemId={item.id} />
     </ScrollView>
     <CommentComposer itemId={item.id} />
+    <Modal visible={confirmDelete} transparent animationType="fade" onRequestClose={() => setConfirmDelete(false)}>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.confirmBox}>
+          <Text style={styles.confirmTitle}>Excluir item</Text>
+          <Text style={styles.confirmText}>Essa ação não pode ser desfeita. Deseja excluir este item?</Text>
+          {deleteError ? <Text style={styles.deleteError}>{deleteError}</Text> : null}
+          <View style={styles.confirmActions}>
+            <Pressable onPress={() => { setConfirmDelete(false); setDeleteError(null); }} style={styles.cancelButton} disabled={deleteMutation.isPending}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </Pressable>
+            <Pressable onPress={() => { void deleteItem(); }} style={styles.confirmDeleteButton} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.deleteButtonText}>Excluir</Text>}
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -173,13 +189,13 @@ function formatCurrency(value: string) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   scroll: { flex: 1, backgroundColor: theme.colors.background },
-  backHeader: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm, gap: theme.spacing.sm },
+  backHeader: { flexDirection: 'row', alignItems: 'center', paddingLeft: theme.spacing.lg, paddingRight: theme.spacing.lg, paddingBottom: theme.spacing.sm, gap: theme.spacing.sm, zIndex: 2, elevation: 2 },
   content: { paddingBottom: 140 },
   titleBlock: { flex: 1, minWidth: 0, justifyContent: 'center' },
   headerCategory: { color: theme.colors.textSecondary, fontSize: 11, marginBottom: 2 },
   headerTitle: { flex: 1, color: theme.colors.text, fontSize: 17, fontWeight: '700' },
-  headerActions: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs },
-  headerActionButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: theme.radius.md, backgroundColor: theme.colors.surface },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, marginRight: theme.spacing.lg },
+  headerActionButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: theme.colors.surfaceElevated, borderWidth: 1, borderColor: '#333743', borderTopColor: '#525866', borderBottomColor: '#08090C', ...theme.shadows.button },
   image: { width: '100%', aspectRatio: 1, borderRadius: theme.radius.lg, marginTop: theme.spacing.lg },
   photoPlaceholder: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.lg, marginBottom: theme.spacing.sm },
@@ -207,16 +223,14 @@ const styles = StyleSheet.create({
   price: { color: theme.colors.primarySoft, fontSize: 28, fontWeight: '700' },
   sectionTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '700', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.sm },
   description: { color: theme.colors.textSecondary, fontSize: 15, lineHeight: 24, paddingHorizontal: theme.spacing.lg },
-  ownerActions: { paddingHorizontal: theme.spacing.lg, marginTop: theme.spacing.xl },
-  actionRow: { flexDirection: 'row', gap: theme.spacing.md },
-  editButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: theme.colors.primary, padding: theme.spacing.md, borderRadius: theme.radius.md },
-  editButtonText: { color: '#081018', fontWeight: '700' },
-  deleteButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: theme.spacing.sm, backgroundColor: '#9F2D3C', padding: theme.spacing.md, borderRadius: theme.radius.md },
+  cancelButtonText: { color: theme.colors.text, fontWeight: '700' },
   deleteButtonText: { color: '#FFFFFF', fontWeight: '700' },
   deleteError: { color: theme.colors.danger, fontSize: 14, marginBottom: theme.spacing.md },
-  confirmBox: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.md, marginBottom: theme.spacing.md },
-  confirmText: { color: theme.colors.text, marginBottom: theme.spacing.md },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.72)', justifyContent: 'center', padding: theme.spacing.xl },
+  confirmBox: { backgroundColor: theme.colors.surfaceElevated, borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.lg, padding: theme.spacing.lg },
+  confirmTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '700', marginBottom: theme.spacing.sm },
+  confirmText: { color: theme.colors.textSecondary, marginBottom: theme.spacing.md, lineHeight: 21 },
   confirmActions: { flexDirection: 'row', gap: theme.spacing.sm },
-  cancelButton: { flex: 1, alignItems: 'center', backgroundColor: theme.colors.surfaceAlt, padding: theme.spacing.md, borderRadius: theme.radius.md },
-  confirmDeleteButton: { flex: 1, alignItems: 'center', backgroundColor: '#9F2D3C', padding: theme.spacing.md, borderRadius: theme.radius.md },
+  cancelButton: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surfaceAlt, padding: theme.spacing.md, borderRadius: theme.radius.md, minHeight: 48 },
+  confirmDeleteButton: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#8F3540', padding: theme.spacing.md, borderRadius: theme.radius.md, minHeight: 48 },
 });
